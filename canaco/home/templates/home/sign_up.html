@@ -1,0 +1,71 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Suscripción{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="card-editorial bg-white overflow-hidden shadow-sm">
+          
+          <div class="p-4 text-white text-center" style="background-color: #0f172a; border-bottom: 4px solid #e11d48;">
+            <span class="text-uppercase small fw-bold" style="color: #e11d48; letter-spacing: 1px;">Registro de Lectores y Colaboradores</span>
+            <h3 class="serif-title fw-bold m-0 mt-1">Crear una Cuenta</h3>
+          </div>
+
+          <div class="p-4 p-md-5">
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'danger' }} rounded-0 small">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+
+            <form method="post">
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-uppercase">Usuario</label>
+                  <input type="text" name="username" class="form-control rounded-0" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-uppercase">Correo Electrónico</label>
+                  <input type="email" name="email" class="form-control rounded-0" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-bold small text-uppercase">Nombre</label>
+                  <input type="text" name="first_name" class="form-control rounded-0" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-bold small text-uppercase">Paterno</label>
+                  <input type="text" name="paterno" class="form-control rounded-0" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-bold small text-uppercase">Materno</label>
+                  <input type="text" name="materno" class="form-control rounded-0" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-uppercase">Contraseña</label>
+                  <input type="password" name="password" class="form-control rounded-0" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-uppercase">Confirmar Contraseña</label>
+                  <input type="password" name="confirm_password" class="form-control rounded-0" required>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-editorial w-100 py-2 mt-4 mb-3">Registrarse</button>
+            </form>
+
+            <div class="text-center border-top pt-3 small">
+              <span class="text-muted">¿Ya tienes cuenta?</span>
+              <a href="{% url 'home:login' %}" class="fw-bold text-decoration-none ms-1" style="color: #e11d48;">Ya tengo cuenta / Iniciar sesión</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}

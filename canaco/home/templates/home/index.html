@@ -1,0 +1,133 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Portada{% endblock %}
+
+{% block content %}
+
+<!-- ======= Carrusel Editorial en 2 Columnas ======= -->
+{% if slider %}
+<section class="py-5" style="background-color: #0f172a; border-bottom: 4px solid #e11d48;">
+  <div class="container">
+    <div id="homeCarousel" class="carousel slide" data-bs-ride="carousel">
+      
+      <div class="carousel-inner">
+        {% for noticia in slider %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}" data-bs-interval="4500">
+          <div class="row align-items-center g-4">
+            
+            <!-- Columna Izquierda: Texto -->
+            <div class="col-lg-6 text-white pe-lg-5">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="px-2 py-1 fw-bold text-uppercase" style="background-color: #e11d48; font-size: 0.75rem; letter-spacing: 1px;">
+                  {% if noticia.categoria %}{{ noticia.categoria.nombre }}{% else %}Nota Principal{% endif %}
+                </span>
+                <span class="text-secondary small">| {{ noticia.createdat|date:"d M, Y" }}</span>
+              </div>
+              
+              <h1 class="display-5 fw-bold mb-3 serif-title">
+                <a href="{% url 'home:noticia_detalle' noticia.id %}" class="text-white text-decoration-none">
+                  {{ noticia.titulo }}
+                </a>
+              </h1>
+              
+              {% if noticia.resumen %}
+              <p class="text-light opacity-75 mb-4 fs-6">{{ noticia.resumen|truncatewords:25 }}</p>
+              {% endif %}
+              
+              <a href="{% url 'home:noticia_detalle' noticia.id %}" class="btn btn-editorial">
+                Leer Reportaje <i class="bi bi-chevron-right ms-1"></i>
+              </a>
+            </div>
+
+            <!-- Columna Derecha: Imagen -->
+            <div class="col-lg-6">
+              <a href="{% url 'home:noticia_detalle' noticia.id %}" class="d-block border border-secondary p-2 bg-dark">
+                {% if noticia.imagen_portada %}
+                  <img src="{{ noticia.imagen_portada.display_url }}" class="d-block w-100" style="height: 380px; object-fit: cover;" alt="{{ noticia.titulo }}">
+                {% else %}
+                  <img src="{% static 'images/hero_1.jpg' %}" class="d-block w-100" style="height: 380px; object-fit: cover;" alt="{{ noticia.titulo }}">
+                {% endif %}
+              </a>
+            </div>
+
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Controles inferiores del carrusel -->
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button class="btn btn-outline-light rounded-0 btn-sm px-3" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+          <i class="bi bi-arrow-left"></i> Anterior
+        </button>
+        <button class="btn btn-outline-light rounded-0 btn-sm px-3" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+          Siguiente <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ======= Listado de Noticias Recientes (Estilo Periódico) ======= -->
+<section class="py-5">
+  <div class="container">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2" style="border-bottom: 2px solid #0f172a;">
+      <h2 class="fw-bold m-0 serif-title">Últimas Publicaciones</h2>
+      <a href="{% url 'home:categoria' %}" class="text-decoration-none fw-bold text-uppercase small" style="color: #e11d48;">
+        Explorar Archivo Completo <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for noticia in publicaciones %}
+      <div class="col-lg-4 col-md-6">
+        <article class="card-editorial h-100 d-flex flex-column">
+          
+          <a href="{% url 'home:noticia_detalle' noticia.id %}" class="d-block overflow-hidden border-bottom">
+            {% if noticia.imagen_portada %}
+              <img src="{{ noticia.imagen_portada.display_url }}" class="w-100" alt="{{ noticia.titulo }}" style="height: 220px; object-fit: cover;">
+            {% else %}
+              <img src="{% static 'images/img_1_horizontal.jpg' %}" class="w-100" alt="{{ noticia.titulo }}" style="height: 220px; object-fit: cover;">
+            {% endif %}
+          </a>
+
+          <div class="p-4 d-flex flex-column flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fw-bold text-uppercase" style="color: #e11d48; font-size: 0.72rem; letter-spacing: 1px;">
+                {% if noticia.categoria %}{{ noticia.categoria.nombre }}{% else %}General{% endif %}
+              </span>
+              <small class="text-muted">{{ noticia.createdat|date:"d/m/Y" }}</small>
+            </div>
+
+            <h4 class="fw-bold mb-3 serif-title">
+              <a href="{% url 'home:noticia_detalle' noticia.id %}" class="text-dark text-decoration-none">
+                {{ noticia.titulo }}
+              </a>
+            </h4>
+
+            <p class="text-secondary small mb-4 flex-grow-1">{{ noticia.resumen|truncatewords:18 }}</p>
+
+            <div class="pt-3 border-top d-flex justify-content-between align-items-center mt-auto">
+              <span class="text-muted small"><i class="bi bi-bar-chart-fill me-1"></i> {{ noticia.visitas }} lecturas</span>
+              <a href="{% url 'home:noticia_detalle' noticia.id %}" class="btn btn-sm btn-dark rounded-0 text-uppercase fw-bold" style="font-size: 0.7rem;">
+                Saber más
+              </a>
+            </div>
+          </div>
+
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12 py-5 text-center">
+        <p class="text-muted">No existen notas registradas en el sistema.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+
+{% endblock content %}

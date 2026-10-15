@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Portal de Noticias{% endblock %} | Pulso Editorial</title>
+
+  <!-- Google Fonts: Playfair Display (Editorial) & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 & Icons (usa los que ya tienes en static/assets) -->
+  <link href="{% static 'assets/vendors/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendors/bootstrap-icons/font/bootstrap-icons.min.css' %}" rel="stylesheet">
+
+  <style>
+    :root {
+      --editorial-dark: #0f172a;
+      --editorial-accent: #e11d48;
+      --editorial-bg: #f8fafc;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--editorial-bg);
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    h1, h2, h3, h4, .serif-title {
+      font-family: 'Playfair Display', serif;
+    }
+    .topbar-editorial {
+      background-color: var(--editorial-dark);
+      color: #94a3b8;
+      font-size: 0.8rem;
+      border-bottom: 1px solid #1e293b;
+    }
+    .navbar-editorial {
+      background-color: #ffffff;
+      border-bottom: 3px solid var(--editorial-dark);
+    }
+    .brand-logo {
+      font-family: 'Playfair Display', serif;
+      font-weight: 800;
+      font-size: 2rem;
+      color: var(--editorial-dark);
+      letter-spacing: -0.5px;
+    }
+    .brand-badge {
+      background-color: var(--editorial-accent);
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 3px 8px;
+      vertical-align: middle;
+    }
+    .btn-editorial {
+      background-color: var(--editorial-accent);
+      color: #ffffff;
+      border-radius: 0;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      padding: 0.55rem 1.25rem;
+      transition: all 0.2s;
+    }
+    .btn-editorial:hover {
+      background-color: var(--editorial-dark);
+      color: #ffffff;
+    }
+    .card-editorial {
+      border: 1px solid #e2e8f0;
+      border-radius: 0;
+      background: #ffffff;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-editorial:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    }
+    main {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra Superior Negra (Estilo Periódico) -->
+  <div class="topbar-editorial py-2">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div>
+        <span class="badge bg-danger rounded-0 me-2">EN VIVO</span>
+        <span>Edición Digital &mdash; Portal Informativo</span>
+      </div>
+      <div class="d-none d-md-flex gap-3">
+        <span><i class="bi bi-globe2 me-1"></i> Redacción Central</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Encabezado Principal -->
+  <header class="navbar-editorial sticky-top shadow-sm">
+    <div class="container py-3">
+      <nav class="navbar navbar-expand-lg p-0">
+        
+        <a class="navbar-brand text-decoration-none d-flex align-items-center gap-2 m-0" href="{% url 'home:index' %}">
+          <span class="brand-logo">CANACO</span>
+          <span class="brand-badge">Prensa</span>
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#editorialNav">
+          <i class="bi bi-list fs-1 text-dark"></i>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="editorialNav">
+          <ul class="navbar-nav align-items-lg-center gap-lg-4 mt-3 mt-lg-0">
+            <li class="nav-item">
+              <a class="nav-link fw-bold text-uppercase small text-dark" style="letter-spacing: 0.5px;" href="{% url 'home:index' %}">Portada</a>
+            </li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle fw-bold text-uppercase small text-dark" style="letter-spacing: 0.5px;" href="{% url 'home:categoria' %}" id="catMenu" role="button" data-bs-toggle="dropdown">
+                Secciones
+              </a>
+              <ul class="dropdown-menu rounded-0 border-dark shadow-sm">
+                <li><a class="dropdown-item fw-semibold" href="{% url 'home:categoria' %}">Todas las secciones</a></li>
+                <li><hr class="dropdown-divider"></li>
+                {% for cat in global_categorias %}
+                  <li><a class="dropdown-item" href="{% url 'home:categoria_detalle' cat.id %}">{{ cat.nombre }}</a></li>
+                {% endfor %}
+              </ul>
+            </li>
+
+            {% if user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link fw-bold text-uppercase small text-dark" href="{% url 'home:perfil' %}">
+                  <i class="bi bi-person-badge me-1 text-danger"></i> Panel ({{ user.username }})
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="btn btn-editorial" href="{% url 'home:logout' %}">Salir</a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link fw-bold text-uppercase small text-dark" href="{% url 'home:login' %}">Acceso</a>
+              </li>
+              <li class="nav-item">
+                <a class="btn btn-editorial" href="{% url 'home:sign_up' %}">Suscribirse</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+
+      </nav>
+    </div>
+  </header>
+
+  <!-- Contenido Dinámico -->
+  <main>
+    {% block content %}
+    {% endblock content %}
+  </main>
+
+  <!-- Pie de Página Dinámico -->
+  {% include 'partials/footer.html' %}
+
+  <script src="{% static 'assets/vendors/bootstrap/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

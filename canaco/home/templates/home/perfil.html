@@ -1,0 +1,53 @@
+{% extends 'partials/sidebar_base.html' %}
+{% load static %}
+{% block title %}Mi Expediente{% endblock %}
+
+{% block sidebar_content %}
+<div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+  <h3 class="serif-title fw-bold m-0">Expediente del Usuario</h3>
+  <a href="{% url 'home:crud_perfil' %}" class="btn btn-editorial">
+    <i class="bi bi-pencil-square me-1"></i> Modificar Datos
+  </a>
+</div>
+
+<div class="row align-items-center g-4">
+  <div class="col-md-4 text-center border-end">
+    {% if perfil_usuario and perfil_usuario.foto %}
+      <img src="{{ perfil_usuario.foto.display_url }}" alt="Foto" class="border p-1 bg-light mb-3" style="width: 140px; height: 140px; object-fit: cover;">
+    {% else %}
+      <img src="{% static 'images/person_1.jpg' %}" alt="Foto" class="border p-1 bg-light mb-3" style="width: 140px; height: 140px; object-fit: cover;">
+    {% endif %}
+    <h5 class="fw-bold mb-0">{{ user.username }}</h5>
+    <span class="badge bg-dark rounded-0 mt-1 text-uppercase">{{ perfil_usuario.rol|default:"Colaborador" }}</span>
+  </div>
+
+  <div class="col-md-8">
+    <div class="row g-3">
+      <div class="col-sm-6">
+        <div class="p-3 bg-light border-start border-4 border-dark">
+          <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem;">Nombre(s)</small>
+          <span class="fs-6 fw-semibold">{{ user.first_name|default:"Sin registrar" }}</span>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="p-3 bg-light border-start border-4 border-dark">
+          <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem;">Apellido Paterno</small>
+          <span class="fs-6 fw-semibold">{{ perfil_usuario.paterno|default:"Sin registrar" }}</span>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="p-3 bg-light border-start border-4 border-dark">
+          <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem;">Apellido Materno</small>
+          <span class="fs-6 fw-semibold">{{ perfil_usuario.materno|default:"Sin registrar" }}</span>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="p-3 bg-light border-start border-4 border-danger">
+          <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem;">Correo Oficial</small>
+          <span class="fs-6 fw-semibold">{{ user.email }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock sidebar_content %}

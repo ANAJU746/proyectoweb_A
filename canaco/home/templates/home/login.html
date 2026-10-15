@@ -1,0 +1,48 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Acceso Editorial{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="card-editorial bg-white overflow-hidden shadow-sm">
+          
+          <div class="p-4 text-white text-center" style="background-color: #0f172a; border-bottom: 4px solid #e11d48;">
+            <span class="text-uppercase small fw-bold" style="color: #e11d48; letter-spacing: 1px;">Credenciales</span>
+            <h3 class="serif-title fw-bold m-0 mt-1">Iniciar Sesión</h3>
+          </div>
+
+          <div class="p-4 p-md-5">
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'danger' }} rounded-0 small">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+
+            <form method="post">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label fw-bold small text-uppercase">Usuario</label>
+                <input type="text" name="username" class="form-control rounded-0 py-2" placeholder="Ingresa tu usuario" required>
+              </div>
+              <div class="mb-4">
+                <label class="form-label fw-bold small text-uppercase">Contraseña</label>
+                <input type="password" name="password" class="form-control rounded-0 py-2" placeholder="••••••••" required>
+              </div>
+              <button type="submit" class="btn btn-editorial w-100 py-2 mb-3">Ingresar al Portal</button>
+            </form>
+
+            <div class="text-center border-top pt-3 small">
+              <span class="text-muted">¿No tienes cuenta registrada?</span>
+              <a href="{% url 'home:sign_up' %}" class="fw-bold text-decoration-none ms-1" style="color: #e11d48;">Crear cuenta</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}

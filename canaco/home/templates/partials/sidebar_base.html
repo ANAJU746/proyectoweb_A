@@ -1,0 +1,46 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="py-4 text-white" style="background-color: #0f172a; border-bottom: 3px solid #e11d48;">
+  <div class="container d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+      <span class="text-uppercase small fw-bold" style="color: #e11d48; letter-spacing: 1px;">Administración Interna</span>
+      <h3 class="serif-title fw-bold m-0">Centro de Control Editorial</h3>
+    </div>
+    <span class="badge bg-dark border border-secondary rounded-0 px-3 py-2 mt-2 mt-sm-0">
+      Sesión activa: {{ user.username }}
+    </span>
+  </div>
+</div>
+
+<section class="py-5" style="min-height: 75vh;">
+  <div class="container">
+    
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-0 shadow-sm mb-4" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+      <div class="col-lg-3">
+        {% include 'partials/sidebar.html' %}
+      </div>
+
+      <div class="col-lg-9">
+        <div class="card-editorial p-4 bg-white">
+          {% block sidebar_content %}
+          {% endblock %}
+          {% block panel_content %}
+          {% endblock %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock content %}

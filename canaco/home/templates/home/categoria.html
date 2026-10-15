@@ -1,0 +1,69 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %}Secciones{% endblock %}
+
+{% block content %}
+<div class="py-4 text-white" style="background-color: #0f172a; border-bottom: 3px solid #e11d48;">
+  <div class="container d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+      <span class="text-uppercase small fw-bold" style="color: #e11d48; letter-spacing: 1px;">Archivo Hemerográfico</span>
+      <h2 class="serif-title fw-bold m-0">
+        {% if categoria_actual %}Sección: {{ categoria_actual.nombre }}{% else %}Todas las Publicaciones{% endif %}
+      </h2>
+    </div>
+    <!-- Filtro rápido de categorías -->
+    <div class="d-flex flex-wrap gap-2 mt-3 mt-md-0">
+      <a href="{% url 'home:categoria' %}" class="btn btn-sm rounded-0 {% if not categoria_actual %}btn-editorial{% else %}btn-outline-light{% endif %}">
+        Todas
+      </a>
+      {% for cat in categorias|default:global_categorias %}
+      <a href="{% url 'home:categoria_detalle' cat.id %}" class="btn btn-sm rounded-0 {% if categoria_actual.id == cat.id %}btn-editorial{% else %}btn-outline-light{% endif %}">
+        {{ cat.nombre }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex flex-column gap-4">
+      {% for noticia in publicaciones %}
+      <article class="card-editorial p-3 bg-white">
+        <div class="row align-items-center g-4">
+          <div class="col-md-4">
+            <a href="{% url 'home:noticia_detalle' noticia.id %}" class="d-block">
+              {% if noticia.imagen_portada %}
+                <img src="{{ noticia.imagen_portada.display_url }}" class="w-100" style="height: 200px; object-fit: cover;" alt="{{ noticia.titulo }}">
+              {% else %}
+                <img src="{% static 'images/img_1_horizontal.jpg' %}" class="w-100" style="height: 200px; object-fit: cover;" alt="{{ noticia.titulo }}">
+              {% endif %}
+            </a>
+          </div>
+          <div class="col-md-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="fw-bold text-uppercase" style="color: #e11d48; font-size: 0.72rem; letter-spacing: 1px;">
+                {% if noticia.categoria %}{{ noticia.categoria.nombre }}{% else %}General{% endif %}
+              </span>
+              <span class="text-muted small">| {{ noticia.createdat|date:"d M, Y" }}</span>
+              <span class="text-muted small ms-auto"><i class="bi bi-eye me-1"></i> {{ noticia.visitas }}</span>
+            </div>
+            <h3 class="serif-title fw-bold mb-2">
+              <a href="{% url 'home:noticia_detalle' noticia.id %}" class="text-dark text-decoration-none">{{ noticia.titulo }}</a>
+            </h3>
+            <p class="text-secondary small mb-3">{{ noticia.resumen|truncatewords:30 }}</p>
+            <a href="{% url 'home:noticia_detalle' noticia.id %}" class="btn btn-dark btn-sm rounded-0 text-uppercase fw-bold" style="font-size: 0.75rem;">
+              Leer más <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </article>
+      {% empty %}
+      <div class="card-editorial p-5 text-center bg-white">
+        <p class="text-muted m-0">No se encontraron publicaciones en esta categoría.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock content %}

@@ -1,0 +1,81 @@
+{% load static %}
+<footer class="text-white pt-5 pb-4 mt-5" style="background-color: #0f172a; border-top: 4px solid #e11d48;">
+  <div class="container">
+    <div class="row g-4">
+      
+      <!-- Columna 1: Identidad del Portal -->
+      <div class="col-lg-4">
+        <h4 class="serif-title fw-bold text-white mb-3">
+          CANACO <span class="px-2 py-1 ms-1 text-uppercase" style="background-color: #e11d48; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.65rem; letter-spacing: 1px;">Prensa</span>
+        </h4>
+        <p class="text-secondary small mb-4" style="line-height: 1.7;">
+          Plataforma informativa digital dedicada a la difusión de noticias, reportajes y comunicados oficiales en tiempo real para nuestra comunidad.
+        </p>
+        <div class="d-flex gap-2">
+          <a href="#" class="btn btn-sm btn-outline-secondary rounded-0 text-white"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="btn btn-sm btn-outline-secondary rounded-0 text-white"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" class="btn btn-sm btn-outline-secondary rounded-0 text-white"><i class="bi bi-instagram"></i></a>
+          <a href="#" class="btn btn-sm btn-outline-secondary rounded-0 text-white"><i class="bi bi-linkedin"></i></a>
+        </div>
+      </div>
+
+      <!-- Columna 2: Secciones (Categorías del Context Processor) -->
+      <div class="col-lg-3 col-md-6">
+        <h6 class="text-uppercase fw-bold mb-3 pb-2 border-bottom border-secondary" style="letter-spacing: 1px; color: #e11d48;">
+          Secciones
+        </h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2">
+            <a href="{% url 'home:index' %}" class="text-secondary text-decoration-none"><i class="bi bi-chevron-right me-1 small"></i> Portada Principal</a>
+          </li>
+          <li class="mb-2">
+            <a href="{% url 'home:categoria' %}" class="text-secondary text-decoration-none"><i class="bi bi-chevron-right me-1 small"></i> Todas las Categorías</a>
+          </li>
+          {% for cat in global_categorias|slice:":5" %}
+          <li class="mb-2">
+            <a href="{% url 'home:categoria_detalle' cat.id %}" class="text-secondary text-decoration-none">
+              <i class="bi bi-chevron-right me-1 small"></i> {{ cat.nombre }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Columna 3: Entradas Recientes (Context Processor) -->
+      <div class="col-lg-5 col-md-6">
+        <h6 class="text-uppercase fw-bold mb-3 pb-2 border-bottom border-secondary" style="letter-spacing: 1px; color: #e11d48;">
+          Últimas Entradas en Redacción
+        </h6>
+        <div class="d-flex flex-column gap-3">
+          {% for reciente in global_recientes|slice:":3" %}
+          <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'home:noticia_detalle' reciente.id %}" class="flex-shrink-0">
+              {% if reciente.imagen_portada %}
+                <img src="{{ reciente.imagen_portada.display_url }}" alt="{{ reciente.titulo }}" style="width: 70px; height: 52px; object-fit: cover; border: 1px solid #334155;">
+              {% else %}
+                <img src="{% static 'images/img_1_sq.jpg' %}" alt="{{ reciente.titulo }}" style="width: 70px; height: 52px; object-fit: cover; border: 1px solid #334155;">
+              {% endif %}
+            </a>
+            <div>
+              <a href="{% url 'home:noticia_detalle' reciente.id %}" class="text-white text-decoration-none fw-semibold small d-block mb-1">
+                {{ reciente.titulo|truncatewords:10 }}
+              </a>
+              <span class="text-secondary" style="font-size: 0.72rem;">
+                <i class="bi bi-clock me-1"></i> {{ reciente.createdat|date:"d M, Y" }}
+              </span>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-secondary small m-0">Sin publicaciones recientes.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+
+    <div class="border-top border-secondary mt-4 pt-3 d-flex flex-wrap justify-content-between align-items-center small text-secondary">
+      <span>&copy; {% now "Y" %} Editorial Canaco. Todos los derechos reservados.</span>
+      <span>Sistema de Gestión de Contenidos</span>
+    </div>
+  </div>
+</footer>
