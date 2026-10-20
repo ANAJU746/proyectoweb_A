@@ -1,0 +1,57 @@
+====================================================
+GUÍA DE INSTALACIÓN Y EJECUCIÓN - PROYECTO WEB
+====================================================
+
+REQUISITOS PREVIOS EN LA NUEVA PC:
+1. Python (versión 3.10 o superior) instalado en el sistema.
+2. Un gestor de bases de datos MySQL (Ej. XAMPP, HeidiSQL o MySQL Workbench).
+
+----------------------------------------------------
+PASO 1: PREPARAR EL PROYECTO
+----------------------------------------------------
+1. Copia toda la carpeta del proyecto desde la USB a la computadora.
+2. Abre la carpeta utilizando Visual Studio Code (VS Code).
+3. Abre la terminal integrada (Menú superior -> Terminal -> Nuevo Terminal).
+
+----------------------------------------------------
+PASO 2: ENTORNO VIRTUAL Y LIBRERÍAS
+----------------------------------------------------
+1. Activa el entorno virtual ejecutando en la terminal (PowerShell):
+   .venv\Scripts\Activate.ps1
+   (Si tu carpeta de entorno se llama diferente, ajusta el nombre, ej: canaco_env\Scripts\Activate.ps1)
+
+   *NOTA DE ERROR COMÚN*: Si PowerShell muestra letras rojas diciendo que "la ejecución de scripts está deshabilitada", ejecuta primero este comando:
+   Set-ExecutionPolicy Unrestricted -Scope Process
+   Y después vuelve a intentar activar el entorno.
+
+2. Instala o verifica las librerías necesarias con:
+   pip install -r requirements.txt
+
+----------------------------------------------------
+PASO 3: RESTAURAR LA BASE DE DATOS (INFORMACIÓN COMPLETA)
+----------------------------------------------------
+Para que el proyecto ya tenga todas las noticias, usuarios, fotos y categorías listas para presentar:
+
+1. Abre tu gestor de base de datos (HeidiSQL o phpMyAdmin).
+2. Crea una base de datos nueva. Revisa el archivo 'canaco/canaco/settings.py' en la sección DATABASES para confirmar el nombre exacto que debes ponerle (por ejemplo: canaco_db).
+3. Importa el respaldo de la base de datos:
+   - En HeidiSQL: Ve a Archivo -> "Cargar archivo SQL...", selecciona el archivo .sql que viene en esta carpeta y presiona Ejecutar (F9 o el triángulo azul).
+   - En phpMyAdmin: Entra a la base de datos creada, ve a la pestaña "Importar", selecciona el archivo .sql y dale a Continuar.
+
+Con este paso, ya no es necesario hacer migraciones vacías. Toda tu información se ha restaurado.
+
+----------------------------------------------------
+PASO 4: ARRANCAR EL SERVIDOR LOCAL
+----------------------------------------------------
+1. En la terminal de VS Code, asegúrate de estar posicionado en la carpeta que contiene el archivo 'manage.py' (si es necesario, escribe: cd canaco).
+2. Arranca el servidor ejecutando:
+   python manage.py runserver
+
+3. Abre tu navegador y accede a:
+   http://127.0.0.1:8000/
+
+----------------------------------------------------
+CREDENCIALES DE ACCESO AL PANEL EDITORIAL:
+----------------------------------------------------
+Usuario: superadmin
+Contraseña: [Escribe aquí tu contraseña para no olvidarla en la presentación]
