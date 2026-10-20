@@ -43,6 +43,12 @@ class AdminAccessTests(TestCase):
 
 
 class NewsGalleryTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(username='news-admin', password='test-password')
+        admin_group = Group.objects.create(name='Administradores')
+        self.admin.groups.add(admin_group)
+        self.client.force_login(self.admin)
+
     def test_news_page_renders_its_gallery_images(self):
         author = User.objects.create_user(username='reporter', password='test-password')
         publication = Publicacion.objects.create(
@@ -67,3 +73,78 @@ class NewsGalleryTests(TestCase):
         self.assertContains(response, image.display_url)
         self.assertContains(response, 'newsGalleryCarousel')
         self.assertContains(response, 'image-lightbox-modal')
+
+    def test_edit_page_displays_existing_gallery_and_new_image_preview(self):
+        publication = Publicacion.objects.create(
+            titulo='Noticia editable',
+            resumen='Resumen',
+            contenido='Contenido',
+        )
+        cover_image = Archivo.objects.create(
+            nombre='portada.jpg',
+            nombre_temporal='portada.jpg',
+            ruta='uploads/portada.jpg',
+        )
+        publication.imagen_portada = cover_image
+        publication.save()
+        image = Archivo.objects.create(
+            nombre='actual.jpg',
+            nombre_temporal='actual.jpg',
+            ruta='uploads/actual.jpg',
+        )
+        gallery_item = GaleriaPublicacion.objects.create(
+            publicacion=publication,
+            archivo=image,
+        )
+
+        response = self.client.get(
+            reverse('home:editar_publicacion', args=[publication.pk])
+        )
+
+        self.assertContains(response, cover_image.display_url)
+        self.assertContains(response, 'inputPortada')
+        self.assertContains(response, 'previewContainerPortada')
+        self.assertContains(response, image.display_url)
+        self.assertContains(response, f'value="{gallery_item.pk}"')
+        self.assertContains(response, 'previewGaleriaNueva')
+
+    def test_edit_page_deletes_only_gallery_items_belonging_to_publication(self):
+        publication = Publicacion.objects.create(
+            titulo='Noticia editable',
+            resumen='Resumen',
+            contenido='Contenido',
+        )
+        other_publication = Publicacion.objects.create(
+            titulo='Otra noticia',
+            resumen='Resumen',
+            contenido='Contenido',
+        )
+        image = Archivo.objects.create(
+            nombre='compartida.jpg',
+            nombre_temporal='compartida.jpg',
+            ruta='uploads/compartida.jpg',
+        )
+        item_to_delete = GaleriaPublicacion.objects.create(
+            publicacion=publication,
+            archivo=image,
+        )
+        unrelated_item = GaleriaPublicacion.objects.create(
+            publicacion=other_publication,
+            archivo=image,
+        )
+
+        response = self.client.post(
+            reverse('home:editar_publicacion', args=[publication.pk]),
+            {
+                'titulo': publication.titulo,
+                'resumen': publication.resumen,
+                'contenido': publication.contenido,
+                'estado': publication.estado,
+                'eliminar_galeria': [item_to_delete.pk, unrelated_item.pk],
+            },
+        )
+
+        self.assertRedirects(response, reverse('home:crud_noticias'))
+        self.assertFalse(GaleriaPublicacion.objects.filter(pk=item_to_delete.pk).exists())
+        self.assertTrue(GaleriaPublicacion.objects.filter(pk=unrelated_item.pk).exists())
+        self.assertTrue(Archivo.objects.filter(pk=image.pk).exists())

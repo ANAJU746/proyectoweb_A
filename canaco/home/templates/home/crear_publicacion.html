@@ -8,6 +8,17 @@
     right: 15px;
     font-style: normal;
 }
+.file-upload-zone {
+    border-style: dashed !important;
+    border-color: #cbd5e1 !important;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.file-upload-zone:hover,
+.file-upload-zone:focus-within {
+    border-color: #dc3545 !important;
+    background-color: #f8f9fa !important;
+}
 </style>
 {% endblock extra_css %}
 {% block sidebar_content %}
@@ -41,12 +52,26 @@
                 </select>
             </div>
         </div>
-        <div class="mb-3">
-            <label for="imagen_portada" class="form-label">Imagen de portada</label>
-            <input type="file" class="form-control" id="imagen_portada" name="imagen_portada">
+        <div class="mb-4">
+            <label class="form-label fw-bold small text-uppercase" for="inputPortada">Imagen de portada</label>
             {% if publicacion and publicacion.imagen_portada %}
-            <small class="text-muted">Actual: {{ publicacion.imagen_portada.nombre }}</small>
+            <div class="mb-3 p-2 bg-light border d-flex align-items-center gap-3">
+                <img src="{{ publicacion.imagen_portada.display_url }}" alt="Portada actual" width="100" height="70" style="object-fit: cover;" class="border shadow-sm">
+                <div>
+                    <small class="text-muted d-block fw-semibold">Imagen de portada actual</small>
+                    <span class="text-secondary small">Si seleccionas una nueva imagen, reemplazará esta portada al guardar.</span>
+                </div>
+            </div>
             {% endif %}
+            <label for="inputPortada" class="file-upload-zone d-block p-4 bg-white border border-2 text-center position-relative">
+                <i class="bi bi-cloud-arrow-up fs-2 text-danger mb-1 d-block" aria-hidden="true"></i>
+                <span class="fw-semibold text-dark small" id="labelPortadaText">Haz clic para seleccionar la imagen de portada</span>
+            </label>
+            <input type="file" name="imagen_portada" id="inputPortada" class="visually-hidden" accept="image/*">
+            <div id="previewContainerPortada" class="mt-2 p-3 bg-light border d-none text-center">
+                <small class="text-uppercase fw-bold d-block mb-2">Vista previa de la nueva portada</small>
+                <img id="imgPreviewPortada" src="" alt="Vista previa de la portada seleccionada" style="max-height: 200px; max-width: 100%; object-fit: cover;" class="border shadow-sm bg-white p-1">
+            </div>
         </div>
         <div class="mb-3">
             <label for="editor" class="form-label">Contenido</label>
@@ -55,9 +80,30 @@
             </div>
             <input type="hidden" name="contenido" id="contenido">
         </div>
-        <div class="mb-3">
-            <label for="galeria" class="form-label">Galería de imágenes</label>
-            <input type="file" class="form-control" id="galeria" name="galeria" multiple>
+        <div class="mb-4">
+            <label class="form-label fw-bold small text-uppercase" for="inputGaleriaNueva">Galería de imágenes</label>
+            {% if galeria %}
+            <p class="small text-muted mb-2">Imágenes actuales. Pulsa la X para marcarlas para eliminar al guardar.</p>
+            <div class="d-flex flex-wrap gap-3 mb-3">
+                {% for item in galeria %}
+                <div class="position-relative border bg-light p-1 shadow-sm existing-gallery-item" id="gallery-item-{{ item.id }}">
+                    <img src="{{ item.archivo.display_url }}" width="100" height="90" style="object-fit: cover;" alt="Imagen actual de la galería">
+                    <input class="visually-hidden gallery-delete-checkbox" type="checkbox" name="eliminar_galeria" value="{{ item.id }}" id="delete-gallery-{{ item.id }}">
+                    <button class="btn btn-danger btn-sm position-absolute top-0 end-0 gallery-delete-button" type="button" aria-label="Marcar imagen para eliminar" aria-pressed="false" aria-controls="delete-gallery-{{ item.id }}" title="Marcar para eliminar">&times;</button>
+                    <span class="gallery-delete-status small text-danger fw-bold d-none">Se eliminará al guardar</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <label for="inputGaleriaNueva" class="file-upload-zone d-block p-4 bg-white border border-2 text-center position-relative mb-2">
+                <i class="bi bi-images fs-2 text-danger mb-1 d-block" aria-hidden="true"></i>
+                <span class="fw-semibold text-dark small" id="labelGaleriaText">Haz clic para agregar fotos a la galería (puedes elegir varias)</span>
+            </label>
+            <input type="file" name="galeria" id="inputGaleriaNueva" class="visually-hidden" accept="image/*" multiple>
+            <div id="previewGaleriaNueva" class="mt-3 p-3 bg-light border d-none">
+                <small class="text-uppercase fw-bold d-block mb-2">Nuevas imágenes seleccionadas</small>
+                <div class="d-flex flex-wrap gap-2" id="boxNuevasImgs"></div>
+            </div>
         </div>
         <div class="d-grid gap-2">
             <button type="submit" class="btn btn-primary">Guardar Publicación</button>
@@ -74,6 +120,84 @@ const quill = new Quill('#editor', {
 });
 document.querySelector('.formEditor').addEventListener('submit', function () {
     document.querySelector('#contenido').value = quill.root.innerHTML;
+});
+
+document.querySelectorAll('.gallery-delete-button').forEach(function (button) {
+    button.addEventListener('click', function () {
+        const checkbox = document.getElementById(button.getAttribute('aria-controls'));
+        const markedForDeletion = !checkbox.checked;
+        checkbox.checked = markedForDeletion;
+        button.setAttribute('aria-pressed', String(markedForDeletion));
+        button.setAttribute('aria-label', markedForDeletion ? 'Deshacer eliminación' : 'Marcar imagen para eliminar');
+        button.setAttribute('title', markedForDeletion ? 'Deshacer eliminación' : 'Marcar para eliminar');
+        button.closest('.existing-gallery-item').querySelector('.gallery-delete-status').classList.toggle('d-none', !markedForDeletion);
+    });
+});
+
+const coverInput = document.getElementById('inputPortada');
+const coverLabel = document.getElementById('labelPortadaText');
+const coverPreview = document.getElementById('previewContainerPortada');
+const coverPreviewImage = document.getElementById('imgPreviewPortada');
+let coverPreviewUrl;
+
+coverInput.addEventListener('change', function () {
+    const file = coverInput.files[0];
+    if (!file) {
+        coverLabel.textContent = 'Haz clic para seleccionar la imagen de portada';
+        coverPreview.classList.add('d-none');
+        return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+        coverInput.value = '';
+        coverLabel.textContent = 'Selecciona un archivo de imagen válido';
+        coverPreview.classList.add('d-none');
+        return;
+    }
+
+    if (coverPreviewUrl) {
+        URL.revokeObjectURL(coverPreviewUrl);
+    }
+    coverPreviewUrl = URL.createObjectURL(file);
+    coverLabel.textContent = 'Archivo seleccionado: ' + file.name;
+    coverPreviewImage.src = coverPreviewUrl;
+    coverPreview.classList.remove('d-none');
+});
+
+const galleryInput = document.getElementById('inputGaleriaNueva');
+const galleryLabel = document.getElementById('labelGaleriaText');
+const galleryPreview = document.getElementById('previewGaleriaNueva');
+const newGalleryImages = document.getElementById('boxNuevasImgs');
+
+galleryInput.addEventListener('change', function () {
+    newGalleryImages.replaceChildren();
+    const selectedFiles = Array.from(galleryInput.files);
+    const imageFiles = selectedFiles.filter(function (file) {
+        return file.type.startsWith('image/');
+    });
+
+    galleryLabel.textContent = selectedFiles.length
+        ? selectedFiles.length + ' archivo(s) seleccionado(s)'
+        : 'Haz clic para agregar fotos a la galería (puedes elegir varias)';
+    galleryPreview.classList.toggle('d-none', imageFiles.length === 0);
+    imageFiles.forEach(function (file) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'border bg-white p-1 shadow-sm';
+
+        const image = document.createElement('img');
+        const previewUrl = URL.createObjectURL(file);
+        image.src = previewUrl;
+        image.alt = file.name;
+        image.width = 90;
+        image.height = 90;
+        image.style.objectFit = 'cover';
+        image.addEventListener('load', function () {
+            URL.revokeObjectURL(previewUrl);
+        }, { once: true });
+
+        wrapper.appendChild(image);
+        newGalleryImages.appendChild(wrapper);
+    });
 });
 </script>
 {% endblock extra_js %}

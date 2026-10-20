@@ -201,6 +201,10 @@ def editar_publicacion(request, pk):
 
         publicacion.save()
 
+        ids_eliminados = request.POST.getlist('eliminar_galeria')
+        if ids_eliminados:
+            publicacion.galeria.filter(pk__in=ids_eliminados).delete()
+
         for imagen in request.FILES.getlist('galeria'):
             GaleriaPublicacion.objects.create(
                 publicacion=publicacion,
@@ -213,6 +217,7 @@ def editar_publicacion(request, pk):
     return render(request, 'home/crear_publicacion.html', {
         'categorias': categorias,
         'publicacion': publicacion,
+        'galeria': publicacion.galeria.select_related('archivo').all(),
     })
 
 
