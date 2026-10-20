@@ -198,6 +198,8 @@ def editar_publicacion(request, pk):
         portada = request.FILES.get('imagen_portada')
         if portada:
             publicacion.imagen_portada = guardar_archivo(portada, request.user)
+        elif request.POST.get('eliminar_portada') == '1':
+            publicacion.imagen_portada = None
 
         publicacion.save()
 

@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import Group, User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from .models import Archivo, GaleriaPublicacion, Publicacion
 
@@ -102,11 +103,17 @@ class NewsGalleryTests(TestCase):
         )
 
         self.assertContains(response, cover_image.display_url)
-        self.assertContains(response, 'inputPortada')
-        self.assertContains(response, 'previewContainerPortada')
+        self.assertContains(response, 'inputPortadaUnica')
+        self.assertContains(response, 'previewPortadaBox')
+        self.assertContains(response, 'checkEliminarPortada')
+        self.assertContains(response, 'btnCancelarPortadaNueva')
         self.assertContains(response, image.display_url)
         self.assertContains(response, f'value="{gallery_item.pk}"')
-        self.assertContains(response, 'previewGaleriaNueva')
+        self.assertContains(response, 'inputGaleriaMultiple')
+        self.assertContains(response, 'previewGaleriaBox')
+        self.assertContains(response, 'containerMinaturasNuevas')
+        self.assertContains(response, 'btnLimpiarTodoGaleria')
+        self.assertContains(response, ':not(#inputGaleriaMultiple)')
 
     def test_edit_page_deletes_only_gallery_items_belonging_to_publication(self):
         publication = Publicacion.objects.create(
@@ -148,3 +155,68 @@ class NewsGalleryTests(TestCase):
         self.assertFalse(GaleriaPublicacion.objects.filter(pk=item_to_delete.pk).exists())
         self.assertTrue(GaleriaPublicacion.objects.filter(pk=unrelated_item.pk).exists())
         self.assertTrue(Archivo.objects.filter(pk=image.pk).exists())
+
+    def test_edit_page_removes_cover_when_requested(self):
+        publication = Publicacion.objects.create(
+            titulo='Noticia con portada',
+            resumen='Resumen',
+            contenido='Contenido',
+        )
+        cover = Archivo.objects.create(
+            nombre='portada.jpg',
+            nombre_temporal='portada.jpg',
+            ruta='uploads/portada.jpg',
+        )
+        publication.imagen_portada = cover
+        publication.save()
+
+        response = self.client.post(
+            reverse('home:editar_publicacion', args=[publication.pk]),
+            {
+                'titulo': publication.titulo,
+                'resumen': publication.resumen,
+                'contenido': publication.contenido,
+                'estado': publication.estado,
+                'eliminar_portada': '1',
+            },
+        )
+
+        self.assertRedirects(response, reverse('home:crud_noticias'))
+        publication.refresh_from_db()
+        self.assertIsNone(publication.imagen_portada)
+        self.assertTrue(Archivo.objects.filter(pk=cover.pk).exists())
+
+    def test_new_cover_replaces_existing_cover_even_when_removal_is_checked(self):
+        publication = Publicacion.objects.create(
+            titulo='Noticia con portada',
+            resumen='Resumen',
+            contenido='Contenido',
+        )
+        old_cover = Archivo.objects.create(
+            nombre='portada-anterior.jpg',
+            nombre_temporal='portada-anterior.jpg',
+            ruta='uploads/portada-anterior.jpg',
+        )
+        publication.imagen_portada = old_cover
+        publication.save()
+
+        response = self.client.post(
+            reverse('home:editar_publicacion', args=[publication.pk]),
+            {
+                'titulo': publication.titulo,
+                'resumen': publication.resumen,
+                'contenido': publication.contenido,
+                'estado': publication.estado,
+                'eliminar_portada': '1',
+                'imagen_portada': SimpleUploadedFile(
+                    'nueva.jpg',
+                    b'new image data',
+                    content_type='image/jpeg',
+                ),
+            },
+        )
+
+        self.assertRedirects(response, reverse('home:crud_noticias'))
+        publication.refresh_from_db()
+        self.assertNotEqual(publication.imagen_portada_id, old_cover.pk)
+        self.assertEqual(publication.imagen_portada.nombre, 'nueva.jpg')

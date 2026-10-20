@@ -146,7 +146,7 @@
 <!-- Script Global de Vista Previa de Imágenes (Soporta selección acumulada de galería) -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const fileInputs = document.querySelectorAll('.editorial-panel-card input[type="file"]');
+  const fileInputs = document.querySelectorAll('.editorial-panel-card input[type="file"]:not(#inputPortadaUnica):not(#inputGaleriaMultiple)');
 
   fileInputs.forEach(function (input) {
     const isGallery = /galeria|gallery/i.test(input.name || "");

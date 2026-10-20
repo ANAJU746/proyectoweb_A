@@ -53,24 +53,38 @@
             </div>
         </div>
         <div class="mb-4">
-            <label class="form-label fw-bold small text-uppercase" for="inputPortada">Imagen de portada</label>
+            <label class="form-label fw-bold small text-uppercase mb-2">Imagen de portada</label>
             {% if publicacion and publicacion.imagen_portada %}
-            <div class="mb-3 p-2 bg-light border d-flex align-items-center gap-3">
-                <img src="{{ publicacion.imagen_portada.display_url }}" alt="Portada actual" width="100" height="70" style="object-fit: cover;" class="border shadow-sm">
+            <div id="currentPortadaWrapper" class="p-3 bg-light border mb-3 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{{ publicacion.imagen_portada.display_url }}" alt="Portada actual" width="90" height="65" style="object-fit: cover;" class="border bg-white shadow-sm p-1">
+                    <div>
+                        <span class="d-block fw-bold text-dark small">Imagen actual guardada</span>
+                        <span class="text-muted" style="font-size: 0.75rem;">Se mantendrá a menos que la elimines o elijas una nueva.</span>
+                    </div>
+                </div>
                 <div>
-                    <small class="text-muted d-block fw-semibold">Imagen de portada actual</small>
-                    <span class="text-secondary small">Si seleccionas una nueva imagen, reemplazará esta portada al guardar.</span>
+                    <input class="d-none" type="checkbox" name="eliminar_portada" value="1" id="checkEliminarPortada">
+                    <button type="button" class="btn btn-outline-danger btn-sm rounded-0 px-3" id="btnQuitarPortadaActual" style="font-size: 0.78rem;">
+                        <i class="bi bi-trash me-1" aria-hidden="true"></i> Quitar portada
+                    </button>
                 </div>
             </div>
             {% endif %}
-            <label for="inputPortada" class="file-upload-zone d-block p-4 bg-white border border-2 text-center position-relative">
-                <i class="bi bi-cloud-arrow-up fs-2 text-danger mb-1 d-block" aria-hidden="true"></i>
-                <span class="fw-semibold text-dark small" id="labelPortadaText">Haz clic para seleccionar la imagen de portada</span>
+            <label for="inputPortadaUnica" class="file-upload-zone d-block p-4 bg-white border border-2 text-center rounded-0 position-relative">
+                <i class="bi bi-image fs-2 text-danger mb-1 d-block" aria-hidden="true"></i>
+                <span class="fw-semibold text-dark small d-block" id="labelPortadaText">Haz clic aquí para seleccionar o cambiar la imagen de portada</span>
+                <span class="text-muted d-block mt-1" style="font-size: 0.72rem;">Formatos aceptados: JPG, PNG, WEBP</span>
             </label>
-            <input type="file" name="imagen_portada" id="inputPortada" class="visually-hidden" accept="image/*">
-            <div id="previewContainerPortada" class="mt-2 p-3 bg-light border d-none text-center">
-                <small class="text-uppercase fw-bold d-block mb-2">Vista previa de la nueva portada</small>
-                <img id="imgPreviewPortada" src="" alt="Vista previa de la portada seleccionada" style="max-height: 200px; max-width: 100%; object-fit: cover;" class="border shadow-sm bg-white p-1">
+            <input type="file" name="imagen_portada" id="inputPortadaUnica" class="d-none" accept="image/*">
+            <div id="previewPortadaBox" class="mt-2 p-3 bg-light border d-none">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-uppercase fw-bold text-danger" style="font-size: 0.7rem;"><i class="bi bi-eye me-1" aria-hidden="true"></i> Vista previa de la nueva portada</small>
+                    <button type="button" class="btn btn-sm btn-outline-dark py-0 px-2 rounded-0" id="btnCancelarPortadaNueva" style="font-size: 0.72rem;">Descartar</button>
+                </div>
+                <div class="text-center">
+                    <img id="imgPreviewPortadaUnica" src="" alt="Vista previa de la nueva portada" style="max-height: 180px; max-width: 100%; object-fit: cover;" class="border shadow-sm bg-white p-1">
+                </div>
             </div>
         </div>
         <div class="mb-3">
@@ -81,28 +95,34 @@
             <input type="hidden" name="contenido" id="contenido">
         </div>
         <div class="mb-4">
-            <label class="form-label fw-bold small text-uppercase" for="inputGaleriaNueva">Galería de imágenes</label>
+            <label class="form-label fw-bold small text-uppercase mb-2" for="inputGaleriaMultiple">Galería de imágenes</label>
             {% if galeria %}
-            <p class="small text-muted mb-2">Imágenes actuales. Pulsa la X para marcarlas para eliminar al guardar.</p>
-            <div class="d-flex flex-wrap gap-3 mb-3">
-                {% for item in galeria %}
-                <div class="position-relative border bg-light p-1 shadow-sm existing-gallery-item" id="gallery-item-{{ item.id }}">
-                    <img src="{{ item.archivo.display_url }}" width="100" height="90" style="object-fit: cover;" alt="Imagen actual de la galería">
-                    <input class="visually-hidden gallery-delete-checkbox" type="checkbox" name="eliminar_galeria" value="{{ item.id }}" id="delete-gallery-{{ item.id }}">
-                    <button class="btn btn-danger btn-sm position-absolute top-0 end-0 gallery-delete-button" type="button" aria-label="Marcar imagen para eliminar" aria-pressed="false" aria-controls="delete-gallery-{{ item.id }}" title="Marcar para eliminar">&times;</button>
-                    <span class="gallery-delete-status small text-danger fw-bold d-none">Se eliminará al guardar</span>
+            <div class="mb-3 p-3 bg-light border">
+                <small class="text-muted d-block mb-2 fw-semibold">Imágenes actuales (marca las que deseas eliminar al guardar):</small>
+                <div class="d-flex flex-wrap gap-3">
+                    {% for item in galeria %}
+                    <div class="position-relative border bg-white p-1 shadow-sm text-center existing-gallery-item" style="width: 100px;" id="gallery-item-{{ item.id }}">
+                        <img src="{{ item.archivo.display_url }}" width="90" height="80" style="object-fit: cover;" alt="Imagen actual de la galería">
+                        <input class="visually-hidden gallery-delete-checkbox" type="checkbox" name="eliminar_galeria" value="{{ item.id }}" id="delete-gallery-{{ item.id }}">
+                        <label class="small text-danger fw-bold" for="delete-gallery-{{ item.id }}" style="cursor: pointer;">Eliminar</label>
+                        <span class="gallery-delete-status small text-danger fw-bold d-none">Se eliminará al guardar</span>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
             {% endif %}
-            <label for="inputGaleriaNueva" class="file-upload-zone d-block p-4 bg-white border border-2 text-center position-relative mb-2">
+            <label for="inputGaleriaMultiple" class="file-upload-zone d-block p-4 bg-white border border-2 text-center rounded-0 position-relative mb-2">
                 <i class="bi bi-images fs-2 text-danger mb-1 d-block" aria-hidden="true"></i>
-                <span class="fw-semibold text-dark small" id="labelGaleriaText">Haz clic para agregar fotos a la galería (puedes elegir varias)</span>
+                <span class="fw-semibold text-dark small d-block" id="labelGaleriaText">Haz clic para seleccionar o agregar más fotos a la galería</span>
+                <span class="text-muted d-block mt-1" style="font-size: 0.72rem;">Puedes elegir varias imágenes a la vez</span>
             </label>
-            <input type="file" name="galeria" id="inputGaleriaNueva" class="visually-hidden" accept="image/*" multiple>
-            <div id="previewGaleriaNueva" class="mt-3 p-3 bg-light border d-none">
-                <small class="text-uppercase fw-bold d-block mb-2">Nuevas imágenes seleccionadas</small>
-                <div class="d-flex flex-wrap gap-2" id="boxNuevasImgs"></div>
+            <input type="file" name="galeria" id="inputGaleriaMultiple" class="visually-hidden" accept="image/*" multiple>
+            <div id="previewGaleriaBox" class="mt-2 p-3 bg-light border d-none">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-uppercase fw-bold text-danger" style="font-size: 0.7rem;"><i class="bi bi-check-circle me-1" aria-hidden="true"></i> Nuevas imágenes listas para subir:</small>
+                    <button type="button" class="btn btn-sm btn-outline-dark py-0 px-2 rounded-0" style="font-size: 0.72rem;" id="btnLimpiarTodoGaleria">Limpiar selección</button>
+                </div>
+                <div class="d-flex flex-wrap gap-2" id="containerMinaturasNuevas"></div>
             </div>
         </div>
         <div class="d-grid gap-2">
@@ -122,29 +142,49 @@ document.querySelector('.formEditor').addEventListener('submit', function () {
     document.querySelector('#contenido').value = quill.root.innerHTML;
 });
 
-document.querySelectorAll('.gallery-delete-button').forEach(function (button) {
-    button.addEventListener('click', function () {
-        const checkbox = document.getElementById(button.getAttribute('aria-controls'));
-        const markedForDeletion = !checkbox.checked;
-        checkbox.checked = markedForDeletion;
-        button.setAttribute('aria-pressed', String(markedForDeletion));
-        button.setAttribute('aria-label', markedForDeletion ? 'Deshacer eliminación' : 'Marcar imagen para eliminar');
-        button.setAttribute('title', markedForDeletion ? 'Deshacer eliminación' : 'Marcar para eliminar');
-        button.closest('.existing-gallery-item').querySelector('.gallery-delete-status').classList.toggle('d-none', !markedForDeletion);
+document.querySelectorAll('.gallery-delete-checkbox').forEach(function (checkbox) {
+    checkbox.addEventListener('change', function () {
+        checkbox.closest('.existing-gallery-item').querySelector('.gallery-delete-status').classList.toggle('d-none', !checkbox.checked);
     });
 });
 
-const coverInput = document.getElementById('inputPortada');
+const coverInput = document.getElementById('inputPortadaUnica');
 const coverLabel = document.getElementById('labelPortadaText');
-const coverPreview = document.getElementById('previewContainerPortada');
-const coverPreviewImage = document.getElementById('imgPreviewPortada');
+const coverPreview = document.getElementById('previewPortadaBox');
+const coverPreviewImage = document.getElementById('imgPreviewPortadaUnica');
+const cancelCoverButton = document.getElementById('btnCancelarPortadaNueva');
+const removeCoverButton = document.getElementById('btnQuitarPortadaActual');
+const removeCoverCheckbox = document.getElementById('checkEliminarPortada');
+const currentCoverWrapper = document.getElementById('currentPortadaWrapper');
+const defaultCoverLabel = 'Haz clic aquí para seleccionar o cambiar la imagen de portada';
 let coverPreviewUrl;
+
+function setCoverMarkedForRemoval(marked) {
+    if (!removeCoverCheckbox || !removeCoverButton || !currentCoverWrapper) {
+        return;
+    }
+
+    removeCoverCheckbox.checked = marked;
+    currentCoverWrapper.style.opacity = marked ? '0.3' : '1';
+    removeCoverButton.disabled = marked;
+    removeCoverButton.classList.toggle('btn-outline-danger', !marked);
+    removeCoverButton.classList.toggle('btn-danger', marked);
+    removeCoverButton.classList.toggle('text-white', marked);
+    removeCoverButton.innerHTML = marked
+        ? 'Portada marcada para eliminar'
+        : '<i class="bi bi-trash me-1" aria-hidden="true"></i> Quitar portada';
+}
+
+if (removeCoverButton) {
+    removeCoverButton.addEventListener('click', function () {
+        setCoverMarkedForRemoval(true);
+    });
+}
 
 coverInput.addEventListener('change', function () {
     const file = coverInput.files[0];
     if (!file) {
-        coverLabel.textContent = 'Haz clic para seleccionar la imagen de portada';
-        coverPreview.classList.add('d-none');
+        coverLabel.textContent = defaultCoverLabel;
         return;
     }
 
@@ -152,6 +192,11 @@ coverInput.addEventListener('change', function () {
         coverInput.value = '';
         coverLabel.textContent = 'Selecciona un archivo de imagen válido';
         coverPreview.classList.add('d-none');
+        coverPreviewImage.src = '';
+        if (coverPreviewUrl) {
+            URL.revokeObjectURL(coverPreviewUrl);
+            coverPreviewUrl = null;
+        }
         return;
     }
 
@@ -159,45 +204,118 @@ coverInput.addEventListener('change', function () {
         URL.revokeObjectURL(coverPreviewUrl);
     }
     coverPreviewUrl = URL.createObjectURL(file);
-    coverLabel.textContent = 'Archivo seleccionado: ' + file.name;
+    coverLabel.textContent = 'Nueva seleccionada: ' + file.name;
     coverPreviewImage.src = coverPreviewUrl;
     coverPreview.classList.remove('d-none');
+    setCoverMarkedForRemoval(false);
+    if (currentCoverWrapper) {
+        currentCoverWrapper.style.opacity = '0.5';
+    }
 });
 
-const galleryInput = document.getElementById('inputGaleriaNueva');
+cancelCoverButton.addEventListener('click', function () {
+    coverInput.value = '';
+    coverLabel.textContent = defaultCoverLabel;
+    coverPreview.classList.add('d-none');
+    coverPreviewImage.src = '';
+    if (coverPreviewUrl) {
+        URL.revokeObjectURL(coverPreviewUrl);
+        coverPreviewUrl = null;
+    }
+    if (currentCoverWrapper && removeCoverCheckbox && !removeCoverCheckbox.checked) {
+        currentCoverWrapper.style.opacity = '1';
+    }
+});
+
+const galleryInput = document.getElementById('inputGaleriaMultiple');
 const galleryLabel = document.getElementById('labelGaleriaText');
-const galleryPreview = document.getElementById('previewGaleriaNueva');
-const newGalleryImages = document.getElementById('boxNuevasImgs');
+const galleryPreview = document.getElementById('previewGaleriaBox');
+const galleryThumbnails = document.getElementById('containerMinaturasNuevas');
+const clearGalleryButton = document.getElementById('btnLimpiarTodoGaleria');
+let galleryFiles = [];
+let galleryPreviewUrls = [];
 
-galleryInput.addEventListener('change', function () {
-    newGalleryImages.replaceChildren();
-    const selectedFiles = Array.from(galleryInput.files);
-    const imageFiles = selectedFiles.filter(function (file) {
-        return file.type.startsWith('image/');
+function renderGalleryPreviews() {
+    galleryPreviewUrls.forEach(function (url) {
+        URL.revokeObjectURL(url);
     });
+    galleryPreviewUrls = [];
+    galleryThumbnails.replaceChildren();
 
-    galleryLabel.textContent = selectedFiles.length
-        ? selectedFiles.length + ' archivo(s) seleccionado(s)'
-        : 'Haz clic para agregar fotos a la galería (puedes elegir varias)';
-    galleryPreview.classList.toggle('d-none', imageFiles.length === 0);
-    imageFiles.forEach(function (file) {
+    galleryFiles.forEach(function (file, index) {
         const wrapper = document.createElement('div');
-        wrapper.className = 'border bg-white p-1 shadow-sm';
+        wrapper.className = 'position-relative border bg-white p-1 shadow-sm';
+        wrapper.style.width = '90px';
 
         const image = document.createElement('img');
         const previewUrl = URL.createObjectURL(file);
+        galleryPreviewUrls.push(previewUrl);
         image.src = previewUrl;
         image.alt = file.name;
-        image.width = 90;
-        image.height = 90;
+        image.width = 80;
+        image.height = 75;
         image.style.objectFit = 'cover';
-        image.addEventListener('load', function () {
-            URL.revokeObjectURL(previewUrl);
-        }, { once: true });
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.innerHTML = '&times;';
+        removeButton.className = 'position-absolute top-0 end-0 bg-danger text-white border-0 fw-bold';
+        removeButton.style.width = '22px';
+        removeButton.style.height = '22px';
+        removeButton.style.fontSize = '14px';
+        removeButton.style.lineHeight = '1';
+        removeButton.title = 'Quitar ' + file.name;
+        removeButton.setAttribute('aria-label', 'Quitar ' + file.name + ' de la selección');
+        removeButton.addEventListener('click', function () {
+            galleryFiles.splice(index, 1);
+            syncGalleryInput();
+            renderGalleryPreviews();
+        });
 
         wrapper.appendChild(image);
-        newGalleryImages.appendChild(wrapper);
+        wrapper.appendChild(removeButton);
+        galleryThumbnails.appendChild(wrapper);
     });
+
+    galleryPreview.classList.toggle('d-none', galleryFiles.length === 0);
+    galleryLabel.textContent = galleryFiles.length
+        ? galleryFiles.length + ' archivo(s) nuevo(s) seleccionado(s)'
+        : 'Haz clic para seleccionar o agregar más fotos a la galería';
+}
+
+function syncGalleryInput() {
+    const transfer = new DataTransfer();
+    galleryFiles.forEach(function (file) {
+        transfer.items.add(file);
+    });
+    galleryInput.files = transfer.files;
+}
+
+galleryInput.addEventListener('change', function () {
+    const knownFiles = new Set(galleryFiles.map(function (file) {
+        return [file.name, file.size, file.lastModified, file.type].join(':');
+    }));
+
+    Array.from(galleryInput.files).forEach(function (file) {
+        if (!file.type.startsWith('image/')) {
+            return;
+        }
+
+        const fileKey = [file.name, file.size, file.lastModified, file.type].join(':');
+        if (!knownFiles.has(fileKey)) {
+            galleryFiles.push(file);
+            knownFiles.add(fileKey);
+        }
+    });
+
+    syncGalleryInput();
+    renderGalleryPreviews();
+});
+
+clearGalleryButton.addEventListener('click', function () {
+    galleryFiles = [];
+    syncGalleryInput();
+    renderGalleryPreviews();
 });
 </script>
 {% endblock extra_js %}
