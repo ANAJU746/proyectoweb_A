@@ -1,30 +1,47 @@
 {% extends 'partials/sidebar_base.html' %}
-{% load static %}
-{% block title %}Cambiar Contraseña{% endblock %}
+{% block title %}Seguridad y Contraseña{% endblock %}
+
 {% block sidebar_content %}
-<div class="profile-page">
-    <div class="profile-edit-card">
-        <h3>Cambiar contraseña</h3>
-        <p>Esta acción modifica la contraseña de tu cuenta actual: <strong>{{ request.user.username }}</strong>.</p>
-        <form method="POST" class="profile-edit-form">
-            {% csrf_token %}
-            <div class="profile-form-row">
-                <label for="actual">Contraseña actual</label>
-                <input type="password" id="actual" name="actual" required>
-            </div>
-            <div class="profile-form-row">
-                <label for="nueva">Nueva contraseña</label>
-                <input type="password" id="nueva" name="nueva" required>
-            </div>
-            <div class="profile-form-row">
-                <label for="confirmar">Confirmar contraseña</label>
-                <input type="password" id="confirmar" name="confirmar" required>
-            </div>
-            <div class="profile-form-actions">
-                <button type="submit" class="btn btn-primary">Actualizar contraseña</button>
-                <a href="{% url 'home:perfil' %}" class="btn btn-outline-secondary">Volver a mi perfil</a>
-            </div>
-        </form>
-    </div>
+<div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+  <div>
+    <span class="text-uppercase fw-bold small" style="color: #e11d48; letter-spacing: 1px;">Seguridad de la Cuenta</span>
+    <h3 class="serif-title fw-bold m-0 border-0 p-0">Cambiar Contraseña</h3>
+  </div>
+  <span class="badge bg-light text-dark border rounded-0 px-3 py-2">
+    <i class="bi bi-person-lock me-1"></i> Cuenta: <strong>{{ user.username }}</strong>
+  </span>
 </div>
+
+<p class="text-secondary small mb-4">
+  Esta acción modifica las credenciales de acceso de tu cuenta actual (<strong>{{ user.username }}</strong>). Al confirmar, deberás utilizar tu nueva clave en el próximo inicio de sesión.
+</p>
+
+<form method="post" class="col-lg-8">
+  {% csrf_token %}
+  
+  <div class="mb-3">
+    <label for="actual_password">Contraseña actual</label>
+    <input type="password" id="actual_password" name="actual_password" placeholder="Ingresa tu contraseña vigente" required>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label for="new_password">Nueva contraseña</label>
+      <input type="password" id="new_password" name="new_password" placeholder="Mínimo 8 caracteres" required>
+    </div>
+    <div class="col-md-6">
+      <label for="confirm_password">Confirmar contraseña</label>
+      <input type="password" id="confirm_password" name="confirm_password" placeholder="Repite la nueva contraseña" required>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 mt-3 pt-2">
+    <button type="submit" class="btn btn-editorial">
+      <i class="bi bi-check2-circle me-1"></i> Actualizar contraseña
+    </button>
+    <a href="{% url 'home:perfil' %}" class="btn btn-outline-dark rounded-0">
+      Volver a mi perfil
+    </a>
+  </div>
+</form>
 {% endblock sidebar_content %}

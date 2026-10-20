@@ -2,7 +2,6 @@
 {% load static %}
 {% block title %}{% if publicacion %} Editar Publicación{% else %}Crear Publicación{% endif %}{% endblock %}
 {% block extra_css %}
-<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 <style>
 .ql-editor.ql-blank::before {
     left: 27px;
@@ -68,7 +67,6 @@
 </div>
 {% endblock sidebar_content %}
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
 <script>
 const quill = new Quill('#editor', {
     theme: 'snow',

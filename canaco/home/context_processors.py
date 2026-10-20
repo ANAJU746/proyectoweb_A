@@ -1,4 +1,5 @@
 from .models import Categoria, Publicacion
+from .permissions import es_administrador
 
 
 def global_categorias(request):
@@ -7,4 +8,5 @@ def global_categorias(request):
         'global_recientes': Publicacion.objects.filter(
             estado=Publicacion.ESTADO_PUBLICADO,
         ).select_related('imagen_portada').order_by('-createdat')[:3],
+        'es_administrador': es_administrador(request.user),
     }

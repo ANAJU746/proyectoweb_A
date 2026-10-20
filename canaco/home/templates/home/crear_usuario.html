@@ -1,7 +1,7 @@
-{% extends 'partials/base.html' %}
+{% extends 'partials/sidebar_base.html' %}
 {% load static %}
 {% block title %}{% if usuario_editado %} Editar Usuario{% else %} Crear Usuario{% endif %}{% endblock %}
-{% block content %}
+{% block sidebar_content %}
 <div class="account-page">
     <div class="account-card">
         <h3>{% if usuario_editado %} Editar una cuenta{% else %} Crear una cuenta{% endif %}</h3>
@@ -72,4 +72,4 @@
         </form>
     </div>
 </div>
-{% endblock content %}
+{% endblock sidebar_content %}

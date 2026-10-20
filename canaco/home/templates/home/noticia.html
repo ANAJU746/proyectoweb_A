@@ -28,9 +28,9 @@
           <!-- Imagen de Portada -->
           <div class="mb-4 border p-1 bg-light">
             {% if publicacion.imagen_portada %}
-              <img src="{{ publicacion.imagen_portada.display_url }}" class="w-100" style="max-height: 460px; object-fit: cover;" alt="{{ publicacion.titulo }}">
+              <img src="{{ publicacion.imagen_portada.display_url }}" class="w-100 news-cover-image" style="max-height: 460px; object-fit: cover;" alt="{{ publicacion.titulo }}">
             {% else %}
-              <img src="{% static 'images/hero_1.jpg' %}" class="w-100" style="max-height: 460px; object-fit: cover;" alt="{{ publicacion.titulo }}">
+              <img src="{% static 'images/hero_1.jpg' %}" class="w-100 news-cover-image" style="max-height: 460px; object-fit: cover;" alt="{{ publicacion.titulo }}">
             {% endif %}
           </div>
 
@@ -51,21 +51,264 @@
           {% if galeria %}
           <div class="mt-5 pt-4 border-top">
             <h4 class="serif-title fw-bold mb-3">Galería Fotográfica</h4>
-            <div class="row g-3">
+            <div id="newsGalleryCarousel" class="carousel slide news-gallery-slider" aria-label="Galería fotográfica">
+              {% if galeria|length > 1 %}
+              <div class="carousel-indicators">
+                {% for item in galeria %}
+                <button type="button" data-bs-target="#newsGalleryCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" {% if forloop.first %}aria-current="true"{% endif %} aria-label="Imagen {{ forloop.counter }}"></button>
+                {% endfor %}
+              </div>
+              {% endif %}
+              <div class="carousel-inner">
               {% for item in galeria %}
-              <div class="col-md-4 col-6">
-                <div class="border p-1 bg-light">
-                  {% if item.archivo %}
-                    <img src="{{ item.archivo.display_url }}" class="w-100" style="height: 140px; object-fit: cover;" alt="Galería">
-                  {% elif item.display_url %}
-                    <img src="{{ item.display_url }}" class="w-100" style="height: 140px; object-fit: cover;" alt="Galería">
-                  {% endif %}
-                </div>
+              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                {% if item.archivo %}
+                <img src="{{ item.archivo.display_url }}" class="d-block w-100 border p-1 bg-light news-gallery-image" alt="Imagen {{ forloop.counter }} de {{ publicacion.titulo }}">
+                {% elif item.display_url %}
+                <img src="{{ item.display_url }}" class="d-block w-100 border p-1 bg-light news-gallery-image" alt="Imagen {{ forloop.counter }} de {{ publicacion.titulo }}">
+                {% endif %}
               </div>
               {% endfor %}
+              </div>
+              {% if galeria|length > 1 %}
+              <button class="carousel-control-prev" type="button" data-bs-target="#newsGalleryCarousel" data-bs-slide="prev" aria-label="Imagen anterior">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#newsGalleryCarousel" data-bs-slide="next" aria-label="Imagen siguiente">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              </button>
+              {% endif %}
             </div>
           </div>
           {% endif %}
+
+          <style>
+            .news-cover-image,
+            .news-gallery-image,
+            .article-body img {
+              cursor: zoom-in;
+              transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .news-cover-image:hover,
+            .news-gallery-image:hover,
+            .article-body img:hover {
+              transform: scale(1.015);
+              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            }
+            .news-gallery-image {
+              height: min(60vh, 460px);
+              object-fit: contain;
+              background-color: #f8fafc;
+            }
+            #image-lightbox-modal {
+              position: fixed;
+              inset: 0;
+              width: 100vw;
+              height: 100vh;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              overflow: hidden;
+              padding: 5rem 2rem;
+              background-color: rgba(15, 23, 42, 0.92);
+              z-index: 99999;
+              opacity: 0;
+              visibility: hidden;
+              pointer-events: none;
+              transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
+            body.lightbox-open {
+              overflow: hidden;
+            }
+            #image-lightbox-modal.active {
+              opacity: 1;
+              visibility: visible;
+              pointer-events: auto;
+            }
+            #image-lightbox-img {
+              display: block;
+              max-width: calc(100vw - 4rem);
+              max-height: calc(100vh - 10rem);
+              object-fit: contain;
+              border: 3px solid #ffffff;
+              box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+              cursor: zoom-in;
+              touch-action: none;
+              user-select: none;
+              -webkit-user-drag: none;
+              transform-origin: center;
+            }
+            #image-lightbox-close {
+              position: absolute;
+              top: 25px;
+              right: 35px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              width: 45px;
+              height: 45px;
+              border: 0;
+              background: #e11d48;
+              color: #ffffff;
+              font-size: 26px;
+              font-weight: bold;
+              cursor: pointer;
+            }
+            #image-lightbox-controls {
+              position: absolute;
+              bottom: 24px;
+              left: 50%;
+              display: flex;
+              gap: 0.5rem;
+              transform: translateX(-50%);
+            }
+            #image-lightbox-controls button {
+              width: 42px;
+              height: 42px;
+              border: 1px solid #ffffff;
+              background: #0f172a;
+              color: #ffffff;
+              font-size: 1.25rem;
+              cursor: pointer;
+            }
+            #image-lightbox-controls button:hover {
+              background: #e11d48;
+            }
+            #image-lightbox-close:hover {
+              background: #0f172a;
+            }
+          </style>
+
+          <div id="image-lightbox-modal" role="dialog" aria-modal="true" aria-label="Vista ampliada de la imagen">
+            <button id="image-lightbox-close" type="button" title="Cerrar" aria-label="Cerrar imagen">&times;</button>
+            <img id="image-lightbox-img" src="" alt="Vista ampliada de la noticia">
+            <div id="image-lightbox-controls" aria-label="Controles de zoom">
+              <button id="image-lightbox-zoom-out" type="button" aria-label="Reducir zoom" title="Reducir zoom">&minus;</button>
+              <button id="image-lightbox-zoom-reset" type="button" aria-label="Restablecer zoom" title="Restablecer zoom">1:1</button>
+              <button id="image-lightbox-zoom-in" type="button" aria-label="Aumentar zoom" title="Aumentar zoom">+</button>
+            </div>
+          </div>
+
+          <script>
+            document.addEventListener("DOMContentLoaded", function () {
+              const modal = document.getElementById("image-lightbox-modal");
+              const modalImg = document.getElementById("image-lightbox-img");
+              const closeBtn = document.getElementById("image-lightbox-close");
+              const zoomInBtn = document.getElementById("image-lightbox-zoom-in");
+              const zoomOutBtn = document.getElementById("image-lightbox-zoom-out");
+              const zoomResetBtn = document.getElementById("image-lightbox-zoom-reset");
+              const images = document.querySelectorAll(".news-cover-image, .news-gallery-image, .article-body img");
+              let zoom = 1;
+              let panX = 0;
+              let panY = 0;
+              let dragging = false;
+              let pointerX = 0;
+              let pointerY = 0;
+
+              images.forEach(function (img) {
+                img.addEventListener("click", function () {
+                  zoom = 1;
+                  panX = 0;
+                  panY = 0;
+                  modalImg.src = this.src;
+                  modalImg.alt = this.alt || "Vista ampliada de la noticia";
+                  updateZoom();
+                  document.body.appendChild(modal);
+                  modal.classList.add("active");
+                  document.body.classList.add("lightbox-open");
+                  closeBtn.focus();
+                });
+              });
+
+              function updateZoom() {
+                modalImg.style.transform = "translate(" + panX + "px, " + panY + "px) scale(" + zoom + ")";
+                modalImg.style.cursor = zoom > 1 ? (dragging ? "grabbing" : "grab") : "zoom-in";
+              }
+
+              function changeZoom(amount) {
+                zoom = Math.min(4, Math.max(1, zoom + amount));
+                if (zoom === 1) {
+                  panX = 0;
+                  panY = 0;
+                }
+                updateZoom();
+              }
+
+              function closeModal() {
+                modal.classList.remove("active");
+                document.body.classList.remove("lightbox-open");
+                modalImg.src = "";
+                zoom = 1;
+                panX = 0;
+                panY = 0;
+                updateZoom();
+              }
+
+              zoomInBtn.addEventListener("click", function () {
+                changeZoom(0.5);
+              });
+              zoomOutBtn.addEventListener("click", function () {
+                changeZoom(-0.5);
+              });
+              zoomResetBtn.addEventListener("click", function () {
+                zoom = 1;
+                panX = 0;
+                panY = 0;
+                updateZoom();
+              });
+              modalImg.addEventListener("wheel", function (event) {
+                event.preventDefault();
+                changeZoom(event.deltaY < 0 ? 0.25 : -0.25);
+              }, { passive: false });
+              modalImg.addEventListener("dblclick", function () {
+                zoom = zoom === 1 ? 2 : 1;
+                if (zoom === 1) {
+                  panX = 0;
+                  panY = 0;
+                }
+                updateZoom();
+              });
+              modalImg.addEventListener("pointerdown", function (event) {
+                if (zoom === 1) {
+                  return;
+                }
+                dragging = true;
+                pointerX = event.clientX;
+                pointerY = event.clientY;
+                modalImg.setPointerCapture(event.pointerId);
+                updateZoom();
+              });
+              modalImg.addEventListener("pointermove", function (event) {
+                if (!dragging) {
+                  return;
+                }
+                panX += event.clientX - pointerX;
+                panY += event.clientY - pointerY;
+                pointerX = event.clientX;
+                pointerY = event.clientY;
+                updateZoom();
+              });
+              modalImg.addEventListener("pointerup", function () {
+                dragging = false;
+                updateZoom();
+              });
+              modalImg.addEventListener("pointercancel", function () {
+                dragging = false;
+                updateZoom();
+              });
+              closeBtn.addEventListener("click", closeModal);
+              modal.addEventListener("click", function (event) {
+                if (event.target === modal) {
+                  closeModal();
+                }
+              });
+              document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && modal.classList.contains("active")) {
+                  closeModal();
+                }
+              });
+            });
+          </script>
 
           <div class="mt-4 pt-3 border-top d-flex justify-content-between text-muted small">
             <span>Autor: <strong>{{ publicacion.autor.username|default:"Redacción" }}</strong></span>

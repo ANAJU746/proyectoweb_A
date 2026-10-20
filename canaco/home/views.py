@@ -1,8 +1,9 @@
 import os
+from functools import wraps
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.core.files.storage import default_storage
 from django.db.models import F
@@ -14,13 +15,22 @@ from .models import (
     Perfil,
     Publicacion,
 )
+from .permissions import es_administrador
 
 
-def es_operador(user):
-    return user.is_authenticated and user.is_staff and user.is_active
+def administrador_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('home:login')
 
+        if not es_administrador(request.user):
+            messages.error(request, 'No tienes permisos para acceder a esta sección.')
+            return redirect('home:perfil')
 
-operador_required = user_passes_test(es_operador, login_url='home:login')
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
 
 
 def guardar_archivo(upload, user):
@@ -74,7 +84,7 @@ def categoria(request, pk=None):
 
 
 def noticia(request, pk=None):
-    if pk and es_operador(request.user):
+    if pk and es_administrador(request.user):
         publicaciones = Publicacion.objects.all()
     else:
         publicaciones = Publicacion.objects.filter(
@@ -122,16 +132,18 @@ def noticia(request, pk=None):
         estado=Comentario.ESTADO_APROBADO,
     ).select_related('user').order_by('-createdat')
     categorias = Categoria.objects.all().order_by('nombre')
+    galeria = publicacion.galeria.all()
 
     return render(request, 'home/noticia.html', {
         'publicacion': publicacion,
+        'galeria': galeria,
         'recientes': recientes,
         'comentarios': comentarios,
         'categorias': categorias,
     })
 
 
-@operador_required
+@administrador_required
 def crear_publicacion(request):
     categorias = Categoria.objects.all().order_by('nombre')
     if request.method == 'POST':
@@ -161,7 +173,7 @@ def crear_publicacion(request):
     return render(request, 'home/crear_publicacion.html', {'categorias': categorias})
 
 
-@operador_required
+@administrador_required
 def crud_noticias(request):
     publicaciones = Publicacion.objects.select_related(
         'categoria', 'autor',
@@ -171,7 +183,7 @@ def crud_noticias(request):
     })
 
 
-@operador_required
+@administrador_required
 def editar_publicacion(request, pk):
     publicacion = get_object_or_404(Publicacion, pk=pk)
     categorias = Categoria.objects.all().order_by('nombre')
@@ -204,7 +216,7 @@ def editar_publicacion(request, pk):
     })
 
 
-@operador_required
+@administrador_required
 def publicar_publicacion(request, pk):
     publicacion = get_object_or_404(Publicacion, pk=pk)
     publicacion.estado = (
@@ -216,7 +228,7 @@ def publicar_publicacion(request, pk):
     return redirect('home:crud_noticias')
 
 
-@operador_required
+@administrador_required
 def eliminar_publicacion(request, pk):
     publicacion = get_object_or_404(Publicacion, pk=pk)
     if request.method == 'POST':
@@ -224,7 +236,7 @@ def eliminar_publicacion(request, pk):
         messages.success(request, 'Publicación eliminada correctamente.')
     return redirect('home:crud_noticias')
 
-@operador_required
+@administrador_required
 def crud_categorias(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre', '').strip()
@@ -236,7 +248,7 @@ def crud_categorias(request):
     categorias = Categoria.objects.all().order_by('-createdat')
     return render(request, 'home/crud_categorias.html', {'categorias': categorias})
 
-@operador_required
+@administrador_required
 def crud_comentarios(request):
     comentarios = Comentario.objects.select_related(
         'publicacion', 'user',
@@ -244,7 +256,7 @@ def crud_comentarios(request):
     return render(request, 'home/crud_comentarios.html', {'comentarios': comentarios})
 
 
-@operador_required
+@administrador_required
 def aprobar_comentario(request, pk):
     comentario = get_object_or_404(Comentario, pk=pk)
     comentario.estado = Comentario.ESTADO_APROBADO
@@ -252,7 +264,7 @@ def aprobar_comentario(request, pk):
     return redirect('home:crud_comentarios')
 
 
-@operador_required
+@administrador_required
 def bloquear_comentario(request, pk):
     comentario = get_object_or_404(Comentario, pk=pk)
     comentario.estado = Comentario.ESTADO_BLOQUEADO
@@ -260,17 +272,14 @@ def bloquear_comentario(request, pk):
     return redirect('home:crud_comentarios')
 
 
-@operador_required
+@administrador_required
 def eliminar_comentario(request, pk):
     comentario = get_object_or_404(Comentario, pk=pk)
     if request.method == 'POST':
         comentario.delete()
     return redirect('home:crud_comentarios')
 
-def crud_usuarios(request):
-    return render(request, 'home/crud_usuarios.html')
-
-@operador_required
+@administrador_required
 def editar_categoria(request, pk):
     categoria = get_object_or_404(Categoria, pk=pk)
     if request.method == 'POST':
@@ -284,7 +293,7 @@ def editar_categoria(request, pk):
     return render(request, 'home/editar_categoria.html', {'categoria': categoria})
 
 
-@operador_required
+@administrador_required
 def eliminar_categoria(request, pk):
     categoria = get_object_or_404(Categoria, pk=pk)
     if request.method == 'POST':
@@ -409,14 +418,14 @@ def crud_cambiar_contrasena(request):
     return render(request, 'home/crud_cambiar_contrasena.html')
 
 
-@operador_required
+@administrador_required
 def crud_usuarios(request):
     for usuario in User.objects.all():
         Perfil.objects.get_or_create(user=usuario)
     usuarios = User.objects.select_related('perfil').order_by('date_joined')
     return render(request, 'home/crud_usuarios.html', {'usuarios': usuarios})
 
-@operador_required
+@administrador_required
 def crear_usuario(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
@@ -458,7 +467,7 @@ def crear_usuario(request):
 
     return render(request, 'home/crear_usuario.html')
 
-@operador_required
+@administrador_required
 def editar_usuario(request, pk):
     usuario = get_object_or_404(User, pk=pk)
     perfil, created = Perfil.objects.get_or_create(user=usuario)
@@ -495,7 +504,7 @@ def editar_usuario(request, pk):
         'perfil_editado': perfil,
     })
 
-@operador_required
+@administrador_required
 def bloquear_usuario(request, pk):
     usuario = get_object_or_404(User, pk=pk)
     if usuario != request.user:
@@ -503,7 +512,7 @@ def bloquear_usuario(request, pk):
         usuario.save()
     return redirect('home:crud_usuarios')
 
-@operador_required
+@administrador_required
 def eliminar_usuario(request, pk):
     usuario = get_object_or_404(User, pk=pk)
     if request.method == 'POST' and usuario != request.user:

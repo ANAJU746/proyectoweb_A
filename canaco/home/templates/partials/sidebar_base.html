@@ -2,6 +2,106 @@
 {% load static %}
 
 {% block content %}
+<style>
+  /* Estilizado automático para todos los formularios y tablas del Panel Editorial */
+  .editorial-panel-card h1, 
+  .editorial-panel-card h2, 
+  .editorial-panel-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: #0f172a;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .editorial-panel-card form label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #334155;
+    margin-top: 1rem;
+    margin-bottom: 0.35rem;
+  }
+  .editorial-panel-card form input[type="text"],
+  .editorial-panel-card form input[type="password"],
+  .editorial-panel-card form input[type="email"],
+  .editorial-panel-card form input[type="file"],
+  .editorial-panel-card form select,
+  .editorial-panel-card form textarea {
+    display: block;
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.95rem;
+    color: #0f172a;
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 0;
+    margin-bottom: 0.5rem;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+  .editorial-panel-card form input:focus,
+  .editorial-panel-card form select:focus,
+  .editorial-panel-card form textarea:focus {
+    outline: none;
+    background-color: #ffffff;
+    border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
+  }
+  .editorial-panel-card form button[type="submit"],
+  .editorial-panel-card .btn-primary,
+  .editorial-panel-card .btn-success {
+    background-color: #e11d48 !important;
+    border-color: #e11d48 !important;
+    color: #ffffff !important;
+    border-radius: 0 !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 0.6rem 1.4rem;
+    margin-top: 1rem;
+  }
+  .editorial-panel-card form button[type="submit"]:hover,
+  .editorial-panel-card .btn-primary:hover {
+    background-color: #0f172a !important;
+    border-color: #0f172a !important;
+  }
+  .editorial-panel-card form a.btn,
+  .editorial-panel-card .btn-secondary,
+  .editorial-panel-card .btn-outline-secondary {
+    border-radius: 0 !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 0.6rem 1.4rem;
+    margin-top: 1rem;
+  }
+  /* Mejora automática de tablas en el panel */
+  .editorial-panel-card table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  .editorial-panel-card table thead th {
+    background-color: #0f172a;
+    color: #ffffff;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 0.85rem;
+    border: none;
+  }
+  .editorial-panel-card table tbody td {
+    padding: 0.85rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+  }
+</style>
+
 <div class="py-4 text-white" style="background-color: #0f172a; border-bottom: 3px solid #e11d48;">
   <div class="container d-flex flex-wrap justify-content-between align-items-center">
     <div>
@@ -32,7 +132,7 @@
       </div>
 
       <div class="col-lg-9">
-        <div class="card-editorial p-4 bg-white">
+        <div class="card-editorial editorial-panel-card p-4 p-md-5 bg-white shadow-sm">
           {% block sidebar_content %}
           {% endblock %}
           {% block panel_content %}
@@ -43,4 +143,81 @@
 
   </div>
 </section>
+<!-- Script Global de Vista Previa de Imágenes (Soporta selección acumulada de galería) -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const fileInputs = document.querySelectorAll('.editorial-panel-card input[type="file"]');
+
+  fileInputs.forEach(function (input) {
+    const isGallery = /galeria|gallery/i.test(input.name || "");
+    const selectedFiles = [];
+
+    if (isGallery) {
+      input.multiple = true;
+    }
+
+    const previewContainer = document.createElement("div");
+    previewContainer.className = "mt-2 p-3 bg-light border d-none";
+    previewContainer.innerHTML = '<small class="text-uppercase fw-bold text-muted d-block mb-2" style="font-size: 0.7rem; letter-spacing: 0.5px;"><i class="bi bi-images me-1 text-danger"></i> Vista previa de selección:</small><div class="d-flex flex-wrap gap-2 preview-images"></div>';
+
+    input.parentNode.insertBefore(previewContainer, input.nextSibling);
+    const imagesBox = previewContainer.querySelector(".preview-images");
+
+    input.addEventListener("change", function () {
+      const files = Array.from(this.files || []);
+
+      if (isGallery) {
+        if (files.length === 0) {
+          selectedFiles.length = 0;
+        } else {
+          const existingFiles = new Set(
+            selectedFiles.map(function (file) {
+              return [file.name, file.size, file.lastModified].join(":");
+            })
+          );
+
+          files.forEach(function (file) {
+            const fileKey = [file.name, file.size, file.lastModified].join(":");
+            if (!existingFiles.has(fileKey)) {
+              selectedFiles.push(file);
+              existingFiles.add(fileKey);
+            }
+          });
+
+          const transfer = new DataTransfer();
+          selectedFiles.forEach(function (file) {
+            transfer.items.add(file);
+          });
+          this.files = transfer.files;
+        }
+      } else {
+        selectedFiles.splice(0, selectedFiles.length, ...files);
+      }
+
+      imagesBox.innerHTML = "";
+      previewContainer.classList.toggle("d-none", selectedFiles.length === 0);
+
+      selectedFiles.forEach(function (file) {
+        if (file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const imgWrapper = document.createElement("div");
+            imgWrapper.className = "border bg-white p-1 shadow-sm";
+
+            const img = document.createElement("img");
+            img.src = event.target.result;
+            img.style.height = "110px";
+            img.style.width = "110px";
+            img.style.objectFit = "cover";
+
+            imgWrapper.appendChild(img);
+            imagesBox.appendChild(imgWrapper);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+  });
+});
+</script>
 {% endblock content %}
