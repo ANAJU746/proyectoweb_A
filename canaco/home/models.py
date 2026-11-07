@@ -97,6 +97,7 @@ class Comentario(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default=ESTADO_PENDIENTE)
     createdat = models.DateTimeField(auto_now_add=True)
     updatedat = models.DateTimeField(auto_now=True)
+    anonimo = models.BooleanField(default=False, verbose_name="Comentario anónimo")
 
     class Meta:
         managed = True

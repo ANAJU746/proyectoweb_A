@@ -25,6 +25,10 @@ SECRET_KEY = 'django-insecure,_-_b=*8b!13ycb%an21k$q2ej(D4g2($dl3))ub5tet%51+j41
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+ALLOWED_HOSTS = ['4.228.216.51', 'canacoam.me', 'www.canacoam.me']
+CSRF_TRUSTED_ORIGINS = ['https://canacoam.me']
+
+
 ALLOWED_HOSTS = []
 
 

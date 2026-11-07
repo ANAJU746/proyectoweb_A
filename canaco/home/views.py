@@ -118,6 +118,7 @@ def noticia(request, pk=None):
                 publicacion=publicacion,
                 user=request.user,
                 contenido=contenido,
+                anonimo=request.POST.get('anonimo') == 'on',
             )
             messages.success(
                 request,
