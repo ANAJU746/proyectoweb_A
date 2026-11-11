@@ -130,4 +130,44 @@
   </div>
 </section>
 
+<!-- Modal Automático de Última Noticia -->
+<div class="modal fade" id="modalDestacado" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold"><i class="bi bi-lightning-charge-fill me-2"></i>¡Lo más reciente!</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        {% with ultima_noticia=publicaciones|first %}
+          {% if ultima_noticia %}
+            {% if ultima_noticia.imagen_portada %}
+              <img src="{{ ultima_noticia.imagen_portada.display_url }}" class="img-fluid rounded mb-3 shadow-sm" alt="Portada" style="max-height: 200px; width: 100%; object-fit: cover;">
+            {% endif %}
+            <h4 class="fw-bold serif-title">{{ ultima_noticia.titulo }}</h4>
+            <p class="text-muted small mt-2">{{ ultima_noticia.resumen|truncatechars:120 }}</p>
+            <div class="mt-4">
+              <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Cerrar</button>
+              <a href="{% url 'home:noticia_detalle' pk=ultima_noticia.pk %}" class="btn btn-danger">Leer completa</a>
+            </div>
+          {% else %}
+            <p>Bienvenido a nuestro portal de noticias.</p>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entrar</button>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    if (!sessionStorage.getItem('modalVisto')) {
+        var modalUltimaNoticia = new bootstrap.Modal(document.getElementById('modalDestacado'));
+        modalUltimaNoticia.show();
+        sessionStorage.setItem('modalVisto', 'true');
+    }
+  });
+</script>
+
 {% endblock content %}
