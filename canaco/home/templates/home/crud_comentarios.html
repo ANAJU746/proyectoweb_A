@@ -37,7 +37,7 @@
                     <td>
                         <form method="post" action="{% url 'home:eliminar_comentario' comentario.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            <button type="submit" class="btn btn-danger btn-sm btn-eliminar">Eliminar</button>
                         </form>
                     </td>
                 </tr>
@@ -48,4 +48,65 @@
         </table>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabla = document.querySelector('table');
+    if(!tabla) return;
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    tabla.addEventListener('click', function(e) {
+        // 1. Interceptar Aprobar o Bloquear
+        const linkAprobar = e.target.closest('a[href*="aprobar_comentario"]');
+        const linkBloquear = e.target.closest('a[href*="bloquear_comentario"]');
+        const link = linkAprobar || linkBloquear;
+
+        if (link) {
+            e.preventDefault();
+            fetch(link.href, {
+                method: 'GET',
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    alert('El comentario ahora está: ' + data.estado);
+                    // Opcional: Podrías cambiar el color de un badge aquí si tienes uno
+                }
+            });
+        }
+
+        // 2. Interceptar Eliminar
+        const btnEliminar = e.target.closest('button.btn-eliminar');
+        if(btnEliminar) {
+            e.preventDefault();
+            if(!confirm('¿Eliminar comentario?')) return;
+            const form = btnEliminar.closest('form');
+            fetch(form.action, {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrftoken}
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) btnEliminar.closest('tr').remove();
+            });
+        }
+    });
+});
+</script>
 {% endblock sidebar_content %}

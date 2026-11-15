@@ -125,6 +125,47 @@
         }, 'image/jpeg', 0.85);
       }
     });
+
+    // NUEVO: AJAX para enviar los datos del perfil sin recargar
+    const formPerfil = document.querySelector('form');
+    if (formPerfil) {
+        formPerfil.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // FormData es capaz de empacar la foto y todo el texto automáticamente
+            const formData = new FormData(formPerfil);
+
+            // Mostrar un texto de "Guardando..." en el botón
+            const btnSubmit = formPerfil.querySelector('button[type="submit"]');
+            const textoOriginal = btnSubmit.innerHTML;
+            btnSubmit.innerHTML = 'Guardando...';
+            btnSubmit.disabled = true;
+
+            fetch(formPerfil.action || window.location.href, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                btnSubmit.innerHTML = textoOriginal;
+                btnSubmit.disabled = false;
+
+                if(data.success) {
+                    alert('¡Éxito! ' + data.mensaje);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btnSubmit.innerHTML = textoOriginal;
+                btnSubmit.disabled = false;
+            });
+        });
+    }
   });
 </script>
 {% endblock sidebar_content %}

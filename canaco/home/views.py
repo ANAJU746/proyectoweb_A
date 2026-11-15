@@ -1,4 +1,6 @@
 import os
+import json
+from django.http import JsonResponse
 from functools import wraps
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
@@ -247,6 +249,23 @@ def eliminar_publicacion(request, pk):
 @administrador_required
 def crud_categorias(request):
     if request.method == 'POST':
+        # Detectar si es una petición AJAX
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json'
+
+        if is_ajax:
+            data = json.loads(request.body)
+            nombre = data.get('nombre', '').strip()
+            if nombre:
+                categoria = Categoria.objects.create(nombre=nombre, fk_user=request.user)
+                return JsonResponse({
+                    'success': True,
+                    'id': categoria.id,
+                    'nombre': categoria.nombre,
+                    'registrado_por': categoria.fk_user.username,
+                    'fecha': categoria.createdat.strftime('%Y-%m-%d %H:%M')
+                })
+            return JsonResponse({'success': False})
+
         nombre = request.POST.get('nombre', '').strip()
         if nombre:
             Categoria.objects.create(nombre=nombre, fk_user=request.user)
@@ -269,6 +288,8 @@ def aprobar_comentario(request, pk):
     comentario = get_object_or_404(Comentario, pk=pk)
     comentario.estado = Comentario.ESTADO_APROBADO
     comentario.save()
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'estado': 'Aprobado'})
     return redirect('home:crud_comentarios')
 
 
@@ -277,6 +298,8 @@ def bloquear_comentario(request, pk):
     comentario = get_object_or_404(Comentario, pk=pk)
     comentario.estado = Comentario.ESTADO_BLOQUEADO
     comentario.save()
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'estado': 'Bloqueado'})
     return redirect('home:crud_comentarios')
 
 
@@ -285,12 +308,24 @@ def eliminar_comentario(request, pk):
     comentario = get_object_or_404(Comentario, pk=pk)
     if request.method == 'POST':
         comentario.delete()
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
     return redirect('home:crud_comentarios')
 
 @administrador_required
 def editar_categoria(request, pk):
     categoria = get_object_or_404(Categoria, pk=pk)
     if request.method == 'POST':
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json'
+        if is_ajax:
+            data = json.loads(request.body)
+            nombre = data.get('nombre', '').strip()
+            if nombre:
+                categoria.nombre = nombre
+                categoria.save()
+                return JsonResponse({'success': True, 'nombre': categoria.nombre})
+            return JsonResponse({'success': False})
+
         nombre = request.POST.get('nombre', '').strip()
         if nombre:
             categoria.nombre = nombre
@@ -306,8 +341,11 @@ def eliminar_categoria(request, pk):
     categoria = get_object_or_404(Categoria, pk=pk)
     if request.method == 'POST':
         categoria.delete()
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+        if is_ajax:
+            return JsonResponse({'success': True})
         messages.success(request, 'Categoría eliminada correctamente.')
-        return redirect('home:crud_categorias')
+    return redirect('home:crud_categorias')
 
 
 # --- VISTAS CON LÓGICA DE USUARIOS ---
@@ -362,6 +400,8 @@ def crud_perfil(request):
     perfil, _ = Perfil.objects.get_or_create(user=user)
 
     if request.method == 'POST':
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
         first_name = request.POST.get('first_name', '').strip()
@@ -370,10 +410,12 @@ def crud_perfil(request):
         foto = request.FILES.get('foto')
 
         if not username:
+            if is_ajax: return JsonResponse({'success': False, 'error': 'El usuario es obligatorio.'})
             messages.error(request, 'El usuario es obligatorio.')
             return redirect('home:crud_perfil')
 
         if User.objects.filter(username=username).exclude(pk=user.pk).exists():
+            if is_ajax: return JsonResponse({'success': False, 'error': 'Ese nombre de usuario ya está en uso.'})
             messages.error(request, 'Ese nombre de usuario ya está en uso.')
             return redirect('home:crud_perfil')
 
@@ -396,6 +438,10 @@ def crud_perfil(request):
             perfil.foto_perfil = guardar_archivo(foto, user)
 
         perfil.save()
+
+        if is_ajax:
+            return JsonResponse({'success': True, 'mensaje': 'Perfil actualizado correctamente.'})
+
         messages.success(request, 'Perfil actualizado correctamente.')
         return redirect('home:perfil')
 
