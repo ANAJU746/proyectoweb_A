@@ -1,258 +1,141 @@
-# Canaco
+<div align="center">
 
-<p align="center">
-  <img src="https://images.unsplash.com/photo-1504711331083-9c895941bf81?auto=format&fit=crop&w=1400&q=80" alt="Portada de noticias" width="100%" />
-</p>
+# 📰 CANACO Prensa — Portal Informativo & Centro de Control Editorial
 
-<p align="center">
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" />
-  <img alt="Django" src="https://img.shields.io/badge/Django-4.2-092E20?logo=django&logoColor=white" />
-  <img alt="MySQL" src="https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white" />
-  <img alt="Bootstrap" src="https://img.shields.io/badge/Bootstrap-5-7952B3?logo=bootstrap&logoColor=white" />
-  <img alt="License" src="https://img.shields.io/badge/License-Project%20Internal-lightgrey" />
-</p>
+**Edición Digital moderna desarrollada con Django, MySQL, AJAX y desplegada en Microsoft Azure con Nginx y SSL.**
 
-Portal de noticias y gestión editorial desarrollado con Django para publicar contenido, administrar usuarios, categorizar noticias y moderar comentarios en una experiencia moderna y sencilla.
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-Framework-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Bootstrap 5](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
+[![Nginx](https://img.shields.io/badge/Nginx-SSL%20Proxy-009639?style=for-the-badge&logo=nginx&logoColor=white)](https://nginx.org/)
+[![Azure](https://img.shields.io/badge/Microsoft%20Azure-Ubuntu%20VM-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
 
-## Descripción general
+🌐 **Sitio en producción:** [https://canacoam.me](https://canacoam.me)
 
-Canaco es un sistema web de noticias orientado a medios digitales que permite:
+</div>
 
-- publicar artículos con portada y galería multimedia
-- organizar el contenido por categorías
-- consultar noticias destacadas y recientes
-- registrar e iniciar sesión de usuarios
-- gestionar perfiles personales y cambio de contraseña
-- moderar comentarios de la comunidad
-- administrar contenido desde un panel de operaciones
+---
 
-## ✨ Características principales
+## 📖 Acerca del Proyecto
 
-### Publicaciones
+**CANACO Prensa** es una plataforma web de gestión y publicación de noticias diseñada con una estética editorial moderna y un panel administrativo ágil. El proyecto integra buenas prácticas de desarrollo web full-stack: desde una experiencia de usuario fluida sin recargas de página mediante **AJAX**, hasta un despliegue seguro en la nube con certificados **SSL**, **Nginx** y administración de servicios en Linux (`systemd`).
 
-- creación de noticias con título, resumen, contenido y estado
-- soporte para imagen de portada
-- galería de imágenes por publicación
-- conteo de visitas por artículo
-- control de publicaciones en borrador o publicadas
+---
 
-### Categorías y navegación
+## ✨ Características Principales
 
-- administración de categorías
-- clasificación por tipo de contenido
-- listado global para navegación del sitio
+### 🌐 Portal Público
+- **Portada Editorial Dinámica:** Visualización de noticias recientes, categorización por secciones y lectura detallada de artículos.
+- **Modal Automático de Última Noticia:** Ventana emergente al ingresar al portal que destaca la publicación más reciente; gestionada con `sessionStorage` para mostrarse solo una vez por sesión sin resultar invasiva.
+- **Sistema de Comentarios:** Soporte para comentarios de usuarios registrados y comentarios anónimos con íconos vectoriales de Bootstrap.
+- **Privacidad y Analítica:** Banner interactivo de consentimiento de cookies (`localStorage`) que activa **Google Analytics (GA4)** únicamente tras la aceptación del usuario.
 
-### Comentarios
+### 🛠️ Centro de Control Editorial (Panel Administrativo)
+- **Operaciones CRUD con AJAX (Fetch API):** Gestión fluida y en tiempo real **sin recargar la página** para:
+  - **Secciones / Categorías:** Creación, edición en línea (alternando dinámicamente el botón *Agregar / Actualizar*) y eliminación instantánea.
+  - **Moderación de Comentarios:** Aprobación, bloqueo y eliminación asíncrona.
+  - **Mi Expediente (Perfil):** Actualización de datos personales y envío de imágenes mediante `FormData`.
+- **Editor y Recortador de Foto de Perfil (`Cropper.js`):** Modal interactivo que permite encuadrar y recortar imágenes en relación `1:1`, optimizándolas automáticamente a formato `.jpg` ligero (`400x400 px`) en el navegador antes de subirlas al servidor.
+- **Control de Acceso y Seguridad:** Autenticación de usuarios, protección CSRF configurada para producción (`CSRF_TRUSTED_ORIGINS`) y gestión de roles.
 
-- comentarios pendientes, aprobados y bloqueados
-- flujo de moderación para contenido del usuario
-- visualización de comentarios en la noticia
+---
 
-### Usuarios y perfiles
+## 🧰 Stack Tecnológico
 
-- registro de usuarios
-- autenticación con Django
-- perfil del usuario con foto y datos adicionales
-- actualización de información personal
-- cambio de contraseña seguro
+| Capa | Tecnologías Utilizadas |
+| :--- | :--- |
+| **Backend** | Python, Django, Django ORM |
+| **Base de Datos** | MySQL |
+| **Frontend** | HTML5, CSS3, Bootstrap 5, Bootstrap Icons, JavaScript (ES6+ / Fetch API) |
+| **Librerías UI** | Cropper.js (recorte de avatares), CKEditor / Quill |
+| **Infraestructura** | Microsoft Azure (Ubuntu Server), Nginx (Proxy Inverso + HTTPS/SSL), Systemd |
+| **Analítica** | Google Analytics (GA4) con carga condicional por cookies |
 
-### Administración
+---
 
-- gestión de noticias, categorías y usuarios
-- revisión de comentarios
-- acceso restringido a operadores y personal administrativo
+## 🏗️ Arquitectura de Despliegue
 
-## 🛠️ Stack tecnológico
+El servidor en **Microsoft Azure** opera bajo un esquema robusto y automatizado:
 
-- Python
-- Django 4.2
-- MySQL
-- HTML5
-- CSS3
-- JavaScript
-- Bootstrap s
-- Django ORM
+```text
+[ Cliente / Navegador (HTTPS) ]
+              │
+              ▼
+   [ Nginx (Puertos 80 / 443) ]  ──► Certificados SSL & Archivos Estáticos/Media
+              │
+              ▼ (Proxy inverso 127.0.0.1:8000)
+   [ Servicio systemd: canaco ]  ──► Aplicación Django (dependiente de mysql.service)
+              │
+              ▼
+       [ MySQL Server ]          ──► Base de datos relacional local
+```
 
-## 📁 Estructura del proyecto
+> **Alta disponibilidad en reinicios:** El servicio `canaco.service` está configurado con `Requires=mysql.service`, `After=network.target mysql.service` y `Restart=always`, garantizando que la base de datos inicie antes que Django y evitando errores `502 Bad Gateway` tras reiniciar la máquina virtual.
+
+---
+
+## 🚀 Instalación Local
+
+Sigue estos pasos para ejecutar el proyecto en tu entorno de desarrollo:
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/tu-usuario/canaco-prensa.git
+   cd canaco-prensa
+   ```
+
+2. **Crear y activar el entorno virtual**
+   ```bash
+   python -m venv entorno_django
+   # En Windows:
+   entorno_django\Scripts\activate
+   # En Linux / macOS:
+   source entorno_django/bin/activate
+   ```
+
+3. **Instalar dependencias**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configurar la base de datos MySQL**
+   Ajusta tus credenciales en `settings.py` y ejecuta las migraciones:
+   ```bash
+   python manage.py makemigrations
+   python manage.py migrate
+   ```
+
+5. **Crear un superusuario y levantar el servidor**
+   ```bash
+   python manage.py createsuperuser
+   python manage.py runserver
+   ```
+   Accede al proyecto en `http://127.0.0.1:8000/`.
+
+---
+
+## 📂 Estructura General del Proyecto
 
 ```text
 canaco/
-├── canaco/                          # Proyecto principal de Django
-│   ├── __init__.py
-│   ├── asgi.py
-│   ├── settings.py                 # Configuración general del proyecto
-│   ├── urls.py                     # Rutas principales
-│   ├── wsgi.py
-│   └── __pycache__/
-├── home/                           # Aplicación principal del sitio
-│   ├── admin.py
-│   ├── apps.py
-│   ├── context_processors.py
-│   ├── migrations/
-│   ├── models.py                  # Modelos de datos
-│   ├── signals.py
-│   ├── templates/                 # Vistas HTML
-│   ├── tests.py
-│   ├── urls.py                    # Rutas de la app
-│   └── views.py                   # Lógica de negocio y controladores
-├── static/                         # Archivos CSS, JS, imágenes globales
-├── media/                          # Archivos subidos por usuarios y publicaciones
-├── db.sqlite3                      # Base de datos local
-├── manage.py                       # Comando principal de Django
-├── README.md
-├── .gitignore
-└── requirements.txt               # Dependencias del proyecto
+├── canaco/                # Configuración principal de Django (settings, urls, wsgi)
+├── home/                  # Aplicación principal (modelos, vistas AJAX, formularios)
+│   ├── templates/
+│   │   ├── home/          # index.html, crud_categorias.html, crud_perfil.html, etc.
+│   │   └── partials/      # base.html, sidebar_base.html
+│   └── views.py           # Lógica del portal y endpoints JsonResponse
+├── static/                # Hojas de estilo, scripts e imágenes estáticas
+├── media/                 # Archivos subidos (portadas de noticias y fotos de perfil)
+└── manage.py
 ```
 
-## 🚀 Requisitos previos
-
-Antes de iniciar el proyecto, asegúrate de tener instalado:
-
-- Python 3.10 o superior
-- pip
-- MySQL o cualquier base de datos compatible
-- entorno virtual recomendado
-
-## ⚙️ Instalación
-
-### 1. Clonar el repositorio
-
-```bash
-git clone <url-del-repositorio>
-cd canaco
-```
-
-### 2. Crear entorno virtual
-
-```bash
-python -m venv venv
-```
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-Linux/macOS:
-
-```bash
-source venv/bin/activate
-```
-
-### 3. Instalar dependencias
-
-```bash
-pip install django mysqlclient
-```
-
-Si agregas un archivo `requirements.txt` en el futuro, puedes usar:
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configurar la base de datos
-
-El proyecto está preparado para trabajar con MySQL en `canaco/settings.py`. Ajusta las credenciales según tu entorno:
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'canaco',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3307',
-    }
-}
-```
-
-Crea la base de datos en MySQL:
-
-```sql
-CREATE DATABASE canaco;
-```
-
-### 5. Ejecutar migraciones
-
-```bash
-python manage.py migrate
-```
-
-### 6. Crear superusuario
-
-```bash
-python manage.py createsuperuser
-```
-
-### 7. Iniciar el servidor
-
-```bash
-python manage.py runserver
-```
-
-Accede a la app en:
-
-```text
-http://127.0.0.1:8000/
-```
-
-## 🧭 Rutas principales
-
-- `/` — inicio del sitio
-- `/login/` — inicio de sesión
-- `/sign_up/` — registro de usuarios
-- `/perfil/` — perfil del usuario
-- `/categoria/` — listado de categorías
-- `/noticia/` — noticias disponibles
-- `/admin/` — panel administrativo de Django
-- `/crud_noticias/` — administración de publicaciones
-- `/crud_categorias/` — administración de categorías
-- `/crud_usuarios/` — gestión de usuarios
-- `/crud_comentarios/` — moderación de comentarios
-
-## 🧩 Modelos principales
-
-- `Categoria`: clasifica las noticias
-- `Publicacion`: almacena el contenido editorial
-- `Comentario`: gestiona feedback y discusión
-- `Perfil`: guarda datos extendidos del usuario
-- `Archivo`: administra archivos e imágenes subidas
-- `GaleriaPublicacion`: colección de imágenes asociadas a una noticia
-
-## 🖼️ Vista del proyecto
-
-<p align="center">
-  <img src="https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80" alt="Diseño de noticia" width="48%" />
-  <img src="https://images.unsplash.com/photo-1516321165247-4aa89a48be28?auto=format&fit=crop&w=1200&q=80" alt="Panel editorial" width="48%" />
-</p>
-
-> Estas imágenes sirven como referencia visual del estilo general del portal de noticias.
-
-## 📌 Buenas prácticas recomendadas
-
-- cambiar `DEBUG = True` en producción
-- proteger `SECRET_KEY`
-- usar variables de entorno para credenciales
-- configurar un servidor web y base de datos adecuados para despliegue real
-- añadir validaciones y pruebas automatizadas en futuras iteraciones
-
-## 🔄 Flujo recomendado de uso
-
-1. Crear una cuenta o iniciar sesión.
-2. Acceder al panel de administrador o operador.
-3. Crear categorías.
-4. Publicar noticias con imagen de portada y galería.
-5. Revisar y aprobar comentarios.
-6. Mantener el contenido actualizado para mejorar la experiencia del lector.
+---
 
 ## 📄 Licencia
 
-Este proyecto está destinado a uso interno o académico según la necesidad del equipo. Si deseas usarlo en producción o compartirlo públicamente, es recomendable definir una licencia apropiada.
+Este proyecto fue desarrollado con fines académicos y demostrativos. Puedes consultar o adaptar el código citando al autor correspondiente.
 
-## 👤 Créditos
-
-Proyecto desarrollado como portal informativo con administración editorial y gestión de contenido en Django.
-
+<div align="center">
+  Hecho con ❤️ usando Django, Bootstrap y Azure.
+</div>
