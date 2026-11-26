@@ -12,6 +12,10 @@
   </a>
 
   {% if es_administrador %}
+    <a href="{% url 'home:estadisticas' %}" class="list-group-item list-group-item-action py-3 {% if request.resolver_match.url_name == 'estadisticas' %}active-sidebar{% endif %}">
+    <i class="bi bi-bar-chart-line me-2"></i> Estadísticas
+  </a>
+
   <a href="{% url 'home:crud_noticias' %}" class="list-group-item list-group-item-action py-3 {% if 'noticias' in request.path or 'publicacion' in request.resolver_match.url_name %}active-sidebar{% endif %}">
     <i class="bi bi-file-earmark-text me-2"></i> Publicaciones
   </a>

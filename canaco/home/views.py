@@ -276,6 +276,53 @@ def crud_categorias(request):
     return render(request, 'home/crud_categorias.html', {'categorias': categorias})
 
 @administrador_required
+def estadisticas(request):
+    from django.db.models import Sum, Count
+    import json
+
+    # 1. Tarjetas de resumen
+    total_publicaciones = Publicacion.objects.filter(estado='publicado').count()
+    total_visitas = Publicacion.objects.aggregate(total=Sum('visitas'))['total'] or 0
+    total_comentarios = Comentario.objects.count()
+    total_usuarios = User.objects.count()
+
+    # 2. Top 5 noticias más leídas (Gráfica de barras)
+    top_noticias = Publicacion.objects.filter(estado='publicado').order_by('-visitas')[:5]
+    titulos_noticias = [n.titulo[:28] + '...' if len(n.titulo) > 28 else n.titulo for n in top_noticias]
+    visitas_noticias = [n.visitas for n in top_noticias]
+
+    # 3. Publicaciones por categoría (Gráfica de dona)
+    categorias_data = Categoria.objects.annotate(
+        total=Count('publicacion')
+    ).filter(total__gt=0)
+    nombres_categorias = [c.nombre for c in categorias_data]
+    conteo_categorias = [c.total for c in categorias_data]
+
+    # 4. Estado de comentarios (Moderación)
+    comentarios_aprobados = Comentario.objects.filter(estado='aprobado').count()
+    comentarios_pendientes = Comentario.objects.filter(estado='pendiente').count()
+    comentarios_bloqueados = Comentario.objects.filter(estado='bloqueado').count()
+
+    context = {
+        'total_publicaciones': total_publicaciones,
+        'total_visitas': total_visitas,
+        'total_comentarios': total_comentarios,
+        'total_usuarios': total_usuarios,
+        'titulos_noticias_json': json.dumps(titulos_noticias),
+        'visitas_noticias_json': json.dumps(visitas_noticias),
+        'nombres_categorias_json': json.dumps(nombres_categorias),
+        'conteo_categorias_json': json.dumps(conteo_categorias),
+        'estados_comentarios_json': json.dumps([
+            comentarios_aprobados,
+            comentarios_pendientes,
+            comentarios_bloqueados
+        ]),
+    }
+    return render(request, 'home/estadisticas.html', context)
+
+
+
+@administrador_required
 def crud_comentarios(request):
     comentarios = Comentario.objects.select_related(
         'publicacion', 'user',
