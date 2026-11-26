@@ -1,0 +1,134 @@
+{% extends 'partials/sidebar_base.html' %}
+{% load static %}
+{% block title %} Estadísticas | CANACO Prensa{% endblock %}
+
+{% block sidebar_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 border-0 pb-0">Estadísticas del Portal</h2>
+    <span class="badge rounded-0 px-3 py-2 text-uppercase" style="background-color: #0f172a; letter-spacing: 0.5px;">
+        Métricas en Tiempo Real
+    </span>
+</div>
+
+<!-- Tarjetas de Resumen (KPIs) -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="p-3 bg-light border rounded-0 h-100" style="border-left: 4px solid #e11d48 !important;">
+            <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Notas Publicadas</small>
+            <span class="fs-2 fw-bold" style="color: #0f172a;">{{ total_publicaciones }}</span>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="p-3 bg-light border rounded-0 h-100" style="border-left: 4px solid #0f172a !important;">
+            <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Visitas Totales</small>
+            <span class="fs-2 fw-bold" style="color: #e11d48;">{{ total_visitas }}</span>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="p-3 bg-light border rounded-0 h-100" style="border-left: 4px solid #e11d48 !important;">
+            <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Comentarios</small>
+            <span class="fs-2 fw-bold" style="color: #0f172a;">{{ total_comentarios }}</span>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="p-3 bg-light border rounded-0 h-100" style="border-left: 4px solid #0f172a !important;">
+            <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Usuarios</small>
+            <span class="fs-2 fw-bold" style="color: #0f172a;">{{ total_usuarios }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfica 1: Top 5 Reportajes Más Leídos (Barras horizontales nativas) -->
+<div class="border rounded-0 p-4 mb-4 bg-white">
+    <h5 class="fw-bold text-uppercase mb-4" style="font-size: 0.85rem; letter-spacing: 0.5px; color: #0f172a;">
+        <i class="bi bi-graph-up-arrow text-danger me-2"></i>Top 5 Reportajes Más Leídos (Visitas)
+    </h5>
+    <div id="contenedorBarrasVisitas"></div>
+</div>
+
+<!-- Gráficas Secundarias: Categorías y Moderación -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="border rounded-0 p-4 bg-white h-100">
+            <h5 class="fw-bold text-uppercase mb-4" style="font-size: 0.85rem; letter-spacing: 0.5px; color: #0f172a;">
+                <i class="bi bi-pie-chart-fill text-danger me-2"></i>Publicaciones por Categoría
+            </h5>
+            <div id="contenedorBarrasCategorias"></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="border rounded-0 p-4 bg-white h-100">
+            <h5 class="fw-bold text-uppercase mb-4" style="font-size: 0.85rem; letter-spacing: 0.5px; color: #0f172a;">
+                <i class="bi bi-chat-square-text-fill text-danger me-2"></i>Moderación de Comentarios
+            </h5>
+            <div id="contenedorBarrasComentarios"></div>
+        </div>
+    </div>
+</div>
+
+{{ titulos_noticias_json|json_script:"data-titulos" }}
+{{ visitas_noticias_json|json_script:"data-visitas" }}
+{{ nombres_categorias_json|json_script:"data-cat-nombres" }}
+{{ conteo_categorias_json|json_script:"data-cat-conteo" }}
+{{ estados_comentarios_json|json_script:"data-comentarios" }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function leerDatos(id) {
+        let dato = JSON.parse(document.getElementById(id).textContent);
+        return typeof dato === 'string' ? JSON.parse(dato) : dato;
+    }
+
+    function dibujarBarras(contenedorId, etiquetas, valores, colores, unidad) {
+        const contenedor = document.getElementById(contenedorId);
+        if (!etiquetas || etiquetas.length === 0) {
+            contenedor.innerHTML = '<p class="text-muted small mb-0">Aún no hay registros suficientes.</p>';
+            return;
+        }
+        const maximo = Math.max(...valores, 1);
+        let html = '';
+        etiquetas.forEach(function(etiqueta, i) {
+            const valor = valores[i] || 0;
+            const porcentaje = Math.round((valor / maximo) * 100);
+            const color = colores[i % colores.length];
+            html += `
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small fw-bold mb-1">
+                        <span style="color: #0f172a;">${etiqueta}</span>
+                        <span style="color: ${color};">${valor} ${unidad}</span>
+                    </div>
+                    <div class="progress rounded-0" style="height: 14px; background-color: #f1f5f9;">
+                        <div class="progress-bar" role="progressbar" style="width: ${porcentaje}%; background-color: ${color};"></div>
+                    </div>
+                </div>
+            `;
+        });
+        contenedor.innerHTML = html;
+    }
+
+    dibujarBarras(
+        'contenedorBarrasVisitas',
+        leerDatos('data-titulos'),
+        leerDatos('data-visitas'),
+        ['#e11d48', '#0f172a', '#334155', '#64748b', '#94a3b8'],
+        'lecturas'
+    );
+
+    dibujarBarras(
+        'contenedorBarrasCategorias',
+        leerDatos('data-cat-nombres'),
+        leerDatos('data-cat-conteo'),
+        ['#0f172a', '#e11d48', '#334155', '#475569', '#64748b'],
+        'notas'
+    );
+
+    dibujarBarras(
+        'contenedorBarrasComentarios',
+        ['Aprobados', 'Pendientes', 'Bloqueados'],
+        leerDatos('data-comentarios'),
+        ['#10b981', '#f59e0b', '#e11d48'],
+        ''
+    );
+});
+</script>
+{% endblock sidebar_content %}
